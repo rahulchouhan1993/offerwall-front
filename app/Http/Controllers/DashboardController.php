@@ -12,9 +12,12 @@ use App\Models\Tracking;
 use App\Models\ConversionErrorTracker;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cookie;
 class DashboardController extends Controller
 {
     public function index(Request $request){
+        $cookieValue = NULL;
+        $requestedParams = $request->all();
         if(!empty($request->apiKey) && !empty($request->wallId)){
             $affiliateRecord = User::where('api_key',$request->apiKey)->where('status',1)->first();
             $appDetails = App::where('appId',base64_decode($request->wallId))->where('status',1)->first();
@@ -42,6 +45,8 @@ class DashboardController extends Controller
                 ])->get($url);
                 if ($response->successful()) {
                     $allOffers = $response->json();
+                    //add cookie
+                    $cookieValue = $this->checkAndSetCookie();
                 }else{
                     die('No offer found');
                 }
@@ -51,7 +56,19 @@ class DashboardController extends Controller
         }else{
             die('Not a valid request');
         }
-        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType'));
+        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams'));
+    }
+
+    function checkAndSetCookie()
+    {
+        $cookieName = 'userCookie';
+        if (isset($_COOKIE[$cookieName])) {
+            return $_COOKIE[$cookieName];
+        }
+        
+        $cookieValue = rand();
+        setcookie($cookieName, $cookieValue, time() + (10 * 365 * 24 * 60 * 60), "/", "", false, false);
+        return $cookieValue;
     }
 
     public function track(Request $request){
@@ -62,7 +79,15 @@ class DashboardController extends Controller
         $appId = base64_decode($request->query('wall'));
         if (!empty($redirectingTo) && $appId>0) {
             $appDetails = App::where('appId',$appId)->first();
-            $redirectingTo.= '&sub2=offerwall&sub3='.$appDetails->id;
+            $userDetails = User::find($appDetails->affiliateId);
+            $trackingData = new Tracking();
+            $trackingData->visitor_id = $_COOKIE['userCookie'];
+            $trackingData->app_id = $appDetails->id;
+            $trackingData->offer_id = $affiseOfferId;
+            $trackingData->user_id = $appDetails->affiliateId;
+            $trackingData->affiliate_id = $userDetails->affiseId;
+            $trackingData->save();
+            $redirectingTo.= '&sub2=offerwall&sub3='.$appDetails->id.'&sub4='.$trackingData->id;
             return redirect()->away($redirectingTo);
         }
         die('Not a valid request');
@@ -71,46 +96,59 @@ class DashboardController extends Controller
     public function updateConversion(){
         $previousDate = date('Y-m-d', strtotime('-1 day'));
         $currentDate = date('Y-m-d');
-        //get all the clicks from the affise of a particular affiliate
-        $allAffiliates = User::where('status',1)->where('role','affiliate')->get();
-        if($allAffiliates && $allAffiliates->isNotEmpty()){
-            foreach($allAffiliates as $affiliateKey => $affiliateValue){
-                $affiseAffiliateId = $affiliateValue->affiseId;
-                $clickUrl = env('AFFISE_API_END') . "stats/clicks?date_from={$previousDate}&date_to={$currentDate}&partner[]={$affiseAffiliateId}";
-                $response = HTTP::withHeaders([
-                    'API-Key' => '6235cc345962e5f2a43b5d6f9c4c7ad4',
-                ])->get($clickUrl);
-                if ($response->successful()) {
-                    $allClicks = $response->json();
-                    if(!empty($allClicks['clicks'])){
-                        foreach($allClicks['clicks'] as $clicKey => $clickValue){
-                            if($clickValue['sub2']!='offerwall'){
-                                continue;
+
+        $clickUrl = env('AFFISE_API_END') . "stats/clicks?limit=1000&date_from={$previousDate}&date_to={$currentDate}";
+        $response = HTTP::withHeaders([
+            'API-Key' => '6235cc345962e5f2a43b5d6f9c4c7ad4',
+        ])->get($clickUrl);
+        if ($response->successful()) {
+            $allClicks = $response->json();
+            
+            if(!empty($allClicks['clicks'])){
+                foreach($allClicks['clicks'] as $clicKey => $clickValue){
+                    if($clickValue['sub2']!='offerwall'){
+                        continue;
+                    }
+                    if($clickValue['sub4']>0 && $clickValue['sub3']>0){
+                        $ifAlreadyAdded = Tracking::where('click_id',$clickValue['click_id'])->first();
+                        if(empty($ifAlreadyAdded)){
+                            $validateTracking = Tracking::find($clickValue['sub4']);
+                            //Check device Type
+                            if (preg_match('/mobile/i', $clickValue['ua'])) {
+                                $deviceType = 'Mobile';
+                            } elseif (preg_match('/tablet|ipad|playbook|silk/i', $clickValue['ua'])) {
+                                $deviceType = 'Tablet';
+                            } else {
+                                $deviceType = 'Desktop';
                             }
-                            $validateTracking = Tracking::where('click_id',$clickValue['click_id'])->first();
-                            if(empty($validateTracking)){
-                                $trackingData = new Tracking();
-                                $trackingData->app_id = $clickValue['sub3'];
-                                $trackingData->offer_id = $clickValue['offer']['id'];
-                                $trackingData->affiliate_id = $clickValue['partner_id'];
-                                $trackingData->country_code = $clickValue['country'];
-                                $trackingData->country_name = $clickValue['country_name'];
-                                $trackingData->browser = $clickValue['browser'];
-                                $trackingData->device_brand = $clickValue['device'];
-                                $trackingData->device_model = $clickValue['device_model'];
-                                $trackingData->device_os = $clickValue['os'];
-                                $trackingData->ip = $clickValue['ip'];
-                                $trackingData->ua = $clickValue['ua'];
-                                $trackingData->goal = NULL;
-                                $trackingData->click_id = $clickValue['click_id'];
-                                $trackingData->click_time = $clickValue['created_at'];
-                                $trackingData->conversion_id = NULL;
-                                $trackingData->conversion_time = NULL;
-                                $trackingData->payout = NULL;
-                                $trackingData->revenue = NULL;
-                                $trackingData->status = 0;
-                                $trackingData->postback_sent = 0;
-                                $trackingData->save();
+                            $deviceIsp = $this->getIsp($clickValue['ip']);
+                            if(!empty($validateTracking)){
+                                $validateTracking->country_code = $clickValue['country'];
+                                $validateTracking->country_name = $clickValue['country_name'];
+                                $validateTracking->browser = $clickValue['browser'];
+                                $validateTracking->device_brand = $clickValue['device'];
+                                $validateTracking->device_model = $clickValue['device_model'];
+                                $validateTracking->device_os = $clickValue['os'];
+                                $validateTracking->device_type = $deviceType;
+                                $validateTracking->isp = $deviceIsp;
+                                $validateTracking->ip = $clickValue['ip'];
+                                $validateTracking->ua = $clickValue['ua'];
+                                $validateTracking->goal = NULL;
+                                $validateTracking->click_id = $clickValue['click_id'];
+                                $validateTracking->click_time = $clickValue['created_at'];
+                                $validateTracking->conversion_id = NULL;
+                                $validateTracking->conversion_time = NULL;
+                                $validateTracking->payout = NULL;
+                                $validateTracking->revenue = NULL;
+                                $validateTracking->status = 0;
+                                $validateTracking->postback_sent = 0;
+                                $validateTracking->save();
+                            }else{
+                                $errorTracking = new ConversionErrorTracker();
+                                $errorTracking->offer_id = $clickValue['offer']['id'];
+                                $errorTracking->click_id = $clickValue['click_id'];
+                                $errorTracking->conversion_id = NULL;
+                                $errorTracking->save();
                             }
                         }
                     }
@@ -118,8 +156,9 @@ class DashboardController extends Controller
             }
         }
         
+       
         //updating the conversions of all added clicks
-        $url = env('AFFISE_API_END') . "stats/conversions?date_from={$previousDate}&date_to={$currentDate}&subid2=offerwall";
+        $url = env('AFFISE_API_END') . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2=offerwall";
         $response = HTTP::withHeaders([
             'API-Key' => env('AFFISE_API_KEY'),
         ])->get($url);
@@ -128,25 +167,33 @@ class DashboardController extends Controller
             if(!empty($allConversion['conversions'])){
                 foreach($allConversion['conversions'] as $key => $value){
                     if($value['sub2']=='offerwall'){
-                        if($value['sub3']>0){
-                            $TrackingDetails = Tracking::where('click_id',$value['clickid'])->first();
-                            if (!empty($TrackingDetails)) {
-                                $TrackingDetails->conversion_id = $value['conversion_id'];
-                                $TrackingDetails->conversion_time = $value['created_at'];
-                                $TrackingDetails->payout = $value['payouts'];
-                                $TrackingDetails->revenue = $value['revenue'];
-                                $TrackingDetails->postback_sent = 1;
-                                $TrackingDetails->status = 1;
-                                $TrackingDetails->save();
-                                //fire postback on webmaster
-
-                                //end
-                            }else{
-                                $errorTracking = new ConversionErrorTracker();
-                                $errorTracking->offer_id = $value['offer_id'];
-                                $errorTracking->click_id = $value['clickid'];
-                                $errorTracking->conversion_id = $value['conversion_id'].'---0';
-                                $errorTracking->save();
+                        if($value['sub3']>0 && $value['sub4']>0){
+                            $ifAlreadyAdded = Tracking::where('conversion_id',$value['conversion_id'])->first();
+                            if(empty($ifAlreadyAdded)){
+                                $TrackingDetails = Tracking::find($value['sub4']);
+                                if (!empty($TrackingDetails)) {
+                                    $appDetail = App::find($TrackingDetails->app_id);
+                                    $TrackingDetails->conversion_id = $value['conversion_id'];
+                                    $TrackingDetails->conversion_time = $value['created_at'];
+                                    $TrackingDetails->payout = $value['payouts'];
+                                    $TrackingDetails->revenue = $value['revenue'];
+                                    $TrackingDetails->postback_sent = 1;
+                                    $TrackingDetails->status = 1;
+                                    $TrackingDetails->postback_url = $appDetail->postback;
+                                    
+                                    //fire postback on webmaster
+                                    $postBackStatus = $this->sendPostback($appDetail->postback);
+                                    $TrackingDetails->http_code = $postBackStatus['http_code'] ?? '500';
+                                    $TrackingDetails->error = $postBackStatus['error'] ?? NULL;
+                                    //end
+                                    $TrackingDetails->save();
+                                }else{
+                                    $errorTracking = new ConversionErrorTracker();
+                                    $errorTracking->offer_id = $value['offer_id'];
+                                    $errorTracking->click_id = $value['clickid'];
+                                    $errorTracking->conversion_id = $value['conversion_id'].'---0';
+                                    $errorTracking->save();
+                                }
                             }
                         }else{
                             $errorTracking = new ConversionErrorTracker();
@@ -159,6 +206,69 @@ class DashboardController extends Controller
                 }
             }
         }
+    }
+
+    public function sendPostback($url){
+        try {
+            $response = Http::timeout(10)->get($url);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'error' => null,
+                    'http_code' => $response->status(),
+                    'response' => $response->body(),
+                ];
+            }
+
+            return [
+                'success' => false,
+                'error' => "HTTP Error: " . $response->status(),
+                'http_code' => $response->status(),
+                'response' => $response->body(),
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'http_code' => null,
+                'response' => null,
+            ];
+        }
+    }
+
+    public function serverPostbacks(){
+        $previousDate = date('Y-m-d', strtotime('-1 day'));
+        $currentDate = date('Y-m-d');
+        $clickUrl = env('AFFISE_API_END') . "stats/serverpostbacks?limit=500&date_from={$previousDate}&date_to={$currentDate}";
+        $response = HTTP::withHeaders([
+            'API-Key' => 'd4e07eaa0fa082d4c2a0a8b86267104f',
+        ])->get($clickUrl);
+        if ($response->successful()) {
+            $allPostbacks = $response->json();
+            if(!empty($allPostbacks['postbacks'])){
+                //67c57e0313757622cb3939ed
+                foreach($allPostbacks['postbacks'] as $postbackDetail){
+                    $existingConversion = Tracking::where('conversion_id',$postbackDetail['conversion_id'])->first();
+                    if(!empty($existingConversion)){
+                        $existingConversion->postback_url = $postbackDetail['postback_url'];
+                        $existingConversion->http_code = $postbackDetail['http_code'];
+                        $existingConversion->save();
+                    }else{
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    public function getIsp($ip){
+        $apiUrl = "https://ipinfo.io/{$ip}/json";
+
+        $response = file_get_contents($apiUrl);
+        $data = json_decode($response, true);
+
+        return $data['org'] ?? 'Unknown';
     }
 
     public function getUserCountry($ip)
@@ -182,6 +292,39 @@ class DashboardController extends Controller
         $contactDetails->message = $request->message;
         $contactDetails->save();
         echo 1;die;
+    }
+
+    public function completedOffers(Request $request){
+        $allOffers = [
+            'offers' => []
+        ];
+        if (isset($_COOKIE['userCookie'])) {
+            $allTrackings = Tracking::where('visitor_id',$_COOKIE['userCookie'])->groupBy('offer_id')->pluck('offer_id'); 
+            $allOffers = [
+                'offers' => []
+            ];
+            if(!empty($allTrackings)){
+                foreach($allTrackings as $trKey => $tracking){
+                    $url = env('AFFISE_API_END').'offer/'.$tracking;
+                    $response = HTTP::withHeaders([
+                        'API-Key' => env('AFFISE_API_KEY'),
+                    ])->get($url);
+                    
+                    if ($response->successful()) {
+                        $offerDetails = $response->json();
+                        $allOffers['offers'][$trKey] = $offerDetails['offer'];
+                    }
+                }
+            }
+        }
+        $appDetails = App::where('appId',base64_decode($request->wallId))->where('status',1)->first();
+        $offerWallTemplate = Template::where('app_id',$appDetails->id)->first();
+        if(empty($offerWallTemplate)){
+            $offerWallTemplate = Template::find(1);
+        }
+        $requestedParams = $request->all();
+        return view('completedoffers',compact('allOffers','offerWallTemplate','appDetails','requestedParams'));
+        
     }
 
 }
