@@ -6,12 +6,16 @@
       <meta name="googlebot" content="noindex, nofollow">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta name="csrf-token" content="{{ csrf_token() }}">
-      <title>Offerwall.XXX</title>
+      <title>OfferwallXXX</title>
       <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/>
       <link rel="stylesheet" href="css/bootstrap.min.css?dfgdg">
       <link rel="stylesheet" href="css/style.css?dfgdg">
       <link rel="icon" type="image/x-icon" href="images/favicon.png">
    </head>
+   @php
+      use App\Models\Setting;
+      $settingDetails = Setting::find(1);
+   @endphp
    <body>
       <div class="container">
          <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -241,19 +245,20 @@
                            <li><a href="#">Support</a></li>
                         </ul>
                      </div>
+                     @if($settingDetails->linkedin!='' && $settingDetails->twitter!='')
                      <div class="footlink">
                         <h2>Social</h2>
                         <ul>
-                           <li><a href="#">Twitter</a></li>
-                           <li><a href="#">LinkedIn</a></li>
-                           <li><a href="#">Facebook</a></li>
+                           <li><a target="_blank" href="{{ $settingDetails->twitter }}">Telegram</a></li>
+                           <li><a target="_blank" href="{{ $settingDetails->linkedin }}">LinkedIn</a></li>
                         </ul>
                      </div>
+                     @endif
                   </div>
                </div>
             </div>
          </div>
-         <div class="copyright">© 2025 <span>Offerwallxxx</span> All Rights Reserved.</div>
+         <div class="copyright">© @php echo date('Y') @endphp <span>OfferwallXXX</span> All Rights Reserved.</div>
       </footer>
       <!--Java Script  -->
       <script src="js/jquery-2.2.4.js"></script> 
