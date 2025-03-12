@@ -21,6 +21,9 @@ class DashboardController extends Controller
         if(!empty($request->apiKey) && !empty($request->wallId)){
             $affiliateRecord = User::where('api_key',$request->apiKey)->where('status',1)->first();
             $appDetails = App::where('appId',base64_decode($request->wallId))->where('status',1)->first();
+            if(empty($affiliateRecord) || empty($appDetails)){
+                die('Invalid Details');
+            }
             $offerWallTemplate = Template::where('app_id',$appDetails->id)->first();
             if(empty($offerWallTemplate)){
                 $offerWallTemplate = Template::find(1);
@@ -39,7 +42,7 @@ class DashboardController extends Controller
                 
                 $userCountry = $this->getUserCountry(request()->ip());
                 //End
-                $url = env('AFFISE_API_END') . "partner/offers?sort[epc]=desc&limit=50&countries[]=$userCountry";
+                $url = $offerSettings->affise_endpoint . "partner/offers?sort[epc]=desc&limit=50&countries[]=$userCountry";
                 $response = HTTP::withHeaders([
                     'API-Key' => $affiliateRecord->affise_api_key,
                 ])->get($url);
@@ -94,12 +97,13 @@ class DashboardController extends Controller
     }
 
     public function updateConversion(){
+        $advertiserDetails = Setting::find(1);
         $previousDate = date('Y-m-d', strtotime('-1 day'));
         $currentDate = date('Y-m-d');
 
-        $clickUrl = env('AFFISE_API_END') . "stats/clicks?limit=1000&date_from={$previousDate}&date_to={$currentDate}";
+        $clickUrl = $advertiserDetails->affise_endpoint . "stats/clicks?limit=1000&date_from={$previousDate}&date_to={$currentDate}";
         $response = HTTP::withHeaders([
-            'API-Key' => '6235cc345962e5f2a43b5d6f9c4c7ad4',
+            'API-Key' => $advertiserDetails->affise_api_key,
         ])->get($clickUrl);
         if ($response->successful()) {
             $allClicks = $response->json();
@@ -158,9 +162,9 @@ class DashboardController extends Controller
         
        
         //updating the conversions of all added clicks
-        $url = env('AFFISE_API_END') . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2=offerwall";
+        $url = $advertiserDetails->affise_endpoint . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2=offerwall";
         $response = HTTP::withHeaders([
-            'API-Key' => env('AFFISE_API_KEY'),
+            'API-Key' => $advertiserDetails->affise_api_key,
         ])->get($url);
         if ($response->successful()) {
             $allConversion = $response->json();
@@ -227,22 +231,30 @@ class DashboardController extends Controller
                 'http_code' => $response->status(),
                 'response' => $response->body(),
             ];
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'http_code' => $e->response ? $e->response->status() : 500,
+                'response' => $e->response ? $e->response->body() : null,
+            ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
-                'http_code' => null,
+                'http_code' => 500,
                 'response' => null,
             ];
         }
     }
 
     public function serverPostbacks(){
+        $advertiserDetails = Setting::find(1);
         $previousDate = date('Y-m-d', strtotime('-1 day'));
         $currentDate = date('Y-m-d');
-        $clickUrl = env('AFFISE_API_END') . "stats/serverpostbacks?limit=500&date_from={$previousDate}&date_to={$currentDate}";
+        $clickUrl = $advertiserDetails->affise_endpoint . "stats/serverpostbacks?limit=500&date_from={$previousDate}&date_to={$currentDate}";
         $response = HTTP::withHeaders([
-            'API-Key' => 'd4e07eaa0fa082d4c2a0a8b86267104f',
+            'API-Key' => $advertiserDetails->affise_api_key,
         ])->get($clickUrl);
         if ($response->successful()) {
             $allPostbacks = $response->json();
@@ -295,6 +307,8 @@ class DashboardController extends Controller
     }
 
     public function completedOffers(Request $request){
+        $offerSettings = Setting::find(1);
+        $advertiserDetails = Setting::find(1);
         $allOffers = [
             'offers' => []
         ];
@@ -305,9 +319,9 @@ class DashboardController extends Controller
             ];
             if(!empty($allTrackings)){
                 foreach($allTrackings as $trKey => $tracking){
-                    $url = env('AFFISE_API_END').'offer/'.$tracking;
+                    $url = $advertiserDetails->affise_endpoint.'offer/'.$tracking;
                     $response = HTTP::withHeaders([
-                        'API-Key' => env('AFFISE_API_KEY'),
+                        'API-Key' => $advertiserDetails->affise_api_key,
                     ])->get($url);
                     
                     if ($response->successful()) {
@@ -323,7 +337,7 @@ class DashboardController extends Controller
             $offerWallTemplate = Template::find(1);
         }
         $requestedParams = $request->all();
-        return view('completedoffers',compact('allOffers','offerWallTemplate','appDetails','requestedParams'));
+        return view('completedoffers',compact('allOffers','offerWallTemplate','appDetails','requestedParams','offerSettings'));
         
     }
 
