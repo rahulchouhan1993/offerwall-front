@@ -103,11 +103,10 @@ class DashboardController extends Controller
 
         $clickUrl = $advertiserDetails->affise_endpoint . "stats/clicks?limit=1000&date_from={$previousDate}&date_to={$currentDate}";
         $response = HTTP::withHeaders([
-            'API-Key' => $advertiserDetails->affise_api_key,
+            'API-Key' =>  $advertiserDetails->affise_api_key,
         ])->get($clickUrl);
         if ($response->successful()) {
             $allClicks = $response->json();
-            
             if(!empty($allClicks['clicks'])){
                 foreach($allClicks['clicks'] as $clicKey => $clickValue){
                     if($clickValue['sub2']!='offerwall'){
@@ -326,6 +325,9 @@ class DashboardController extends Controller
                     
                     if ($response->successful()) {
                         $offerDetails = $response->json();
+                        if(!$this->isValidImageUrl($offerDetails['offer']['logo'])){
+                            $offerDetails['offer']['logo'] = $offerSettings->default_image;
+                        }
                         $allOffers['offers'][$trKey] = $offerDetails['offer'];
                     }
                 }
@@ -339,6 +341,16 @@ class DashboardController extends Controller
         $requestedParams = $request->all();
         return view('completedoffers',compact('allOffers','offerWallTemplate','appDetails','requestedParams','offerSettings'));
         
+    }
+
+    function isValidImageUrl($url) {
+        try {
+            $response = Http::head($url);
+    
+            return $response->successful(); // Returns true if status is 200 OK
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
 }
