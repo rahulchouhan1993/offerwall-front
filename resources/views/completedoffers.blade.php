@@ -96,11 +96,11 @@
                             <div style="width: calc(100% - 200px);">
                                 <h2 style="margin: 0 0 10px; font-weight: 600; font-size: 18px; color: {{ $offerWallTemplate->offerText }};">{{ $offer['title'] }}</h2>
                                 <div style="display:flex;gap: 14px;align-items: center;">
-                                    <svg width="18" height="18" viewBox="0 0 16 16" fill="{{ $offerWallTemplate->offerText }};" xmlns="http://www.w3.org/2000/svg">
+                                    {{-- <svg width="18" height="18" viewBox="0 0 16 16" fill="{{ $offerWallTemplate->offerText }};" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M8 0C9.06087 0 10.0783 0.421427 10.8284 1.17157C11.5786 1.92172 12 2.93913 12 4C12 5.06087 11.5786 6.07828 10.8284 6.82843C10.0783 7.57857 9.06087 8 8 8C6.93913 8 5.92172 7.57857 5.17157 6.82843C4.42143 6.07828 4 5.06087 4 4C4 2.93913 4.42143 1.92172 5.17157 1.17157C5.92172 0.421427 6.93913 0 8 0ZM8 2C7.46957 2 6.96086 2.21071 6.58579 2.58579C6.21071 2.96086 6 3.46957 6 4C6 4.53043 6.21071 5.03914 6.58579 5.41421C6.96086 5.78929 7.46957 6 8 6C8.53043 6 9.03914 5.78929 9.41421 5.41421C9.78929 5.03914 10 4.53043 10 4C10 3.46957 9.78929 2.96086 9.41421 2.58579C9.03914 2.21071 8.53043 2 8 2ZM8 9C10.67 9 16 10.33 16 13V16H0V13C0 10.33 5.33 9 8 9ZM8 10.9C5.03 10.9 1.9 12.36 1.9 13V14.1H14.1V13C14.1 12.36 10.97 10.9 8 10.9Z" fill="{{ $offerWallTemplate->offerText }}"></path>
-                                    </svg>
+                                    </svg> --}}
                                     <div style="font-size: 18px;color: {{ $offerWallTemplate->offerText }};">
-                                        856
+                                        {{ implode(',',$offer['offerCategories']) }}
                                     </div>
                                 </div>
                             </div>
@@ -131,8 +131,17 @@
                     <div style="display: flex ; flex-wrap: wrap; justify-content: space-between; align-items: center; width: 100%; background-color: {{ $offerWallTemplate->offerText }}; padding: 9px 15px; border-radius: 6px; gap:10px">
                         <div style="display: flex ; justify-content: space-between; align-items: center; gap: 4px;">
                             <svg style="width: 23px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="{{ $offerWallTemplate->offerBg }}"><path d="M9 1V3H15V1H17V3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3H7V1H9ZM20 11H4V19H20V11ZM7 5H4V9H20V5H17V7H15V5H9V7H7V5Z"></path></svg>
-                            <h2 style="font-size: 15px; color: {{ $offerWallTemplate->offerBg }}; margin: 0; font-weight: 600;">15 Aug 2015</h2>
+                            <h2 style="font-size: 15px; color: {{ $offerWallTemplate->offerBg }}; margin: 0; font-weight: 600;">{{ $offer['click_time'] }}</h2>
                         </div>
+                        <div style="display: flex ; justify-content: space-between; align-items: center; gap: 4px;">
+                            
+                            <svg style="width: 23px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="{{ $offerWallTemplate->offerBg }}">
+                                <path d="M10.5 0.5H9.5L6.5 3.5L9.5 6.5H10.5V4.5H12V10.208C11.117 10.5938 10.5 11.4748 10.5 12.5C10.5 13.8807 11.6193 15 13 15C14.3807 15 15.5 13.8807 15.5 12.5C15.5 11.4748 14.883 10.5938 14 10.208V2.5H10.5V0.5Z" fill="{{ $offerWallTemplate->offerBg }}"/>
+                                <path d="M6.5 15.5L9.5 12.5L6.5 9.5H5.5V11.5H4V5.79198C4.88295 5.4062 5.5 4.52516 5.5 3.5C5.5 2.11929 4.38071 1 3 1C1.61929 1 0.5 2.11929 0.5 3.5C0.5 4.52516 1.11705 5.4062 2 5.79198V13.5H5.5V15.5H6.5Z" fill="{{ $offerWallTemplate->offerBg }}"/>
+                                </svg>
+                            <h2 style="font-size: 15px; color: {{ $offerWallTemplate->offerBg }}; margin: 0; font-weight: 600;">{{ $offer['reward_status'] }}</h2>
+                        </div>
+                        
                         </div>
                     </div>
                 @endforeach

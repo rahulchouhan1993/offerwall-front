@@ -13,6 +13,7 @@ use App\Models\ConversionErrorTracker;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cookie;
+use Carbon\Carbon;
 class DashboardController extends Controller
 {
     public function index(Request $request){
@@ -98,8 +99,8 @@ class DashboardController extends Controller
 
     public function updateConversion(){
         $advertiserDetails = Setting::find(1);
-        $previousDate = date('Y-m-d', strtotime('-1 day'));
-        $currentDate = date('Y-m-d');
+        $previousDate = Carbon::yesterday()->toDateString();
+        $currentDate = Carbon::today()->toDateString();
 
         $clickUrl = $advertiserDetails->affise_endpoint . "stats/clicks?limit=1000&date_from={$previousDate}&date_to={$currentDate}";
         $response = HTTP::withHeaders([
@@ -249,8 +250,8 @@ class DashboardController extends Controller
 
     public function serverPostbacks(){
         $advertiserDetails = Setting::find(1);
-        $previousDate = date('Y-m-d', strtotime('-1 day'));
-        $currentDate = date('Y-m-d');
+        $previousDate = Carbon::yesterday()->toDateString();
+        $currentDate = Carbon::today()->toDateString();
         $clickUrl = $advertiserDetails->affise_endpoint . "stats/serverpostbacks?limit=500&date_from={$previousDate}&date_to={$currentDate}";
         $response = HTTP::withHeaders([
             'API-Key' => $advertiserDetails->affise_api_key,
@@ -312,13 +313,19 @@ class DashboardController extends Controller
             'offers' => []
         ];
         if (isset($_COOKIE['userCookie'])) {
-            $allTrackings = Tracking::where('visitor_id',$_COOKIE['userCookie'])->groupBy('offer_id')->pluck('offer_id'); 
+            $allTrackings = Tracking::whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('trackings')
+                    ->where('visitor_id', $_COOKIE['userCookie'])
+                    ->groupBy('offer_id');
+            })->orderBy('id', 'DESC')->get();
             $allOffers = [
                 'offers' => []
             ];
-            if(!empty($allTrackings)){
+
+            if($allTrackings->isNotEmpty()){
                 foreach($allTrackings as $trKey => $tracking){
-                    $url = $advertiserDetails->affise_endpoint.'offer/'.$tracking;
+                    $url = $advertiserDetails->affise_endpoint.'offer/'.$tracking->offer_id;
                     $response = HTTP::withHeaders([
                         'API-Key' => $advertiserDetails->affise_api_key,
                     ])->get($url);
@@ -328,11 +335,21 @@ class DashboardController extends Controller
                         if(!$this->isValidImageUrl($offerDetails['offer']['logo'])){
                             $offerDetails['offer']['logo'] = $offerSettings->default_image;
                         }
-                        $allOffers['offers'][$trKey] = $offerDetails['offer'];
+                        if(!empty($offerDetails['offer']['full_categories'])){
+                            foreach($offerDetails['offer']['full_categories'] as $categ){
+                                $offerDetails['offer']['offerCategories'][] = $categ['title'];
+                            }
+                        }else{
+                            $offerDetails['offer']['offerCategories'] = [];
+                        }
+                        $offerDetails['offer']['click_time'] = Carbon::parse($tracking->created_at)->format('d M Y');
+                        $offerDetails['offer']['reward_status'] = ($tracking->postback_sent) ? 'Completed' : 'Pending';
+                        $allOffers['offers'][$tracking->id] = $offerDetails['offer'];
                     }
                 }
             }
         }
+        
         $appDetails = App::where('appId',base64_decode($request->wallId))->where('status',1)->first();
         $offerWallTemplate = Template::where('app_id',$appDetails->id)->first();
         if(empty($offerWallTemplate)){
