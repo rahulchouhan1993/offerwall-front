@@ -60,7 +60,7 @@ class DashboardController extends Controller
         }else{
             die('Not a valid request');
         }
-        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams'));
+        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry'));
     }
 
     function checkAndSetCookie()
@@ -183,10 +183,31 @@ class DashboardController extends Controller
                                     $TrackingDetails->revenue = $value['revenue'];
                                     $TrackingDetails->postback_sent = 1;
                                     $TrackingDetails->status = 1;
-                                    $TrackingDetails->postback_url = $appDetail->postback;
+
+                                    //defining postback url with parameters
+                                    $replacements = [
+                                        '{visitor_id}' => $TrackingDetails->visitor_id,
+                                        '{ip}' => $TrackingDetails->ip,
+                                        '{user_agent}' => $TrackingDetails->ua,
+                                        '{device_type}' => $TrackingDetails->device_type,
+                                        '{sub1}' => $TrackingDetails->click_id,
+                                        '{sub2}' => 'offerwall',
+                                        '{sub3}' => $TrackingDetails->app_id,
+                                        '{sub4}' => $TrackingDetails->id,
+                                        '{offer_id}' => $TrackingDetails->offer_id,
+                                        '{status}' => 'confirmed',
+                                        '{payout}' => $value['payouts'],
+                                        '{geo}' => $TrackingDetails->country_code,
+                                        '{goal}' => $TrackingDetails->country_code,
+                                        '{currency}' => '$',
+                                        '{os}' => $TrackingDetails->device_os,
+                                    ];
                                     
+                                    $postbackUrl = strtr($appDetail->postback, $replacements);                                    
+                                    $TrackingDetails->postback_url = $postbackUrl;
+
                                     //fire postback on webmaster
-                                    $postBackStatus = $this->sendPostback($appDetail->postback);
+                                    $postBackStatus = $this->sendPostback($postbackUrl);
                                     $TrackingDetails->http_code = $postBackStatus['http_code'] ?? '500';
                                     $TrackingDetails->error = $postBackStatus['error'] ?? NULL;
                                     //end

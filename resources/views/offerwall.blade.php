@@ -75,33 +75,35 @@
          </div>
          <div style="display: flex ; height: 100%;  padding-bottom: 60px; align-items: start; width: 100%; flex-direction: column; font-family: Open Sans; background-color:{{ $offerWallTemplate->bodyBg }}">
             <div class="cntmainbx" style="width:100%; display: flex; flex-direction: column; align-items: flex-start; gap: 15px; padding: 60px; padding-bottom: 80px; background: {{ $offerWallTemplate->bodyBg }};">
-                @foreach ($allOffers['offers'] as $offer)
-                @php
+               @foreach ($allOffers['offers'] as $offer)
+               @php
                   $checkIfAlredyCliced = Tracking::where('offer_id',$offer['id'])->where('visitor_id',$cookieValue)->first();
                   if(!empty($checkIfAlredyCliced)){
                      continue;
                   }
-                @endphp
-                @if(in_array($deviceType,$offer['targeting'][0]['device_type']) || empty($offer['targeting'][0]['device_type']))
-                @php 
+                  $deviceAllowed = empty($offer['targeting'][0]['device_type']) || in_array($deviceType, $offer['targeting'][0]['device_type']);
+                  $countryAllowed = empty($offer['targeting'][0]['country']['allow']) || in_array($userCountry, $offer['targeting'][0]['country']['allow']);
+               @endphp
+               @if($deviceAllowed && $countryAllowed)
+               @php 
                     $ufto = base64_encode($offer['link']);
                     $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.base64_encode($appDetails->appId).'&vstr='.base64_encode($cookieValue);
                     $descriptionOffer = html_entity_decode(strip_tags($offer['description_lang']['en']));
-                @endphp
-                @if(empty($descriptionOffer))
+               @endphp
+               @if(empty($descriptionOffer))
                     @php $descriptionOffer = $offerSettings->default_description; @endphp
-                @endif
-                @if(empty($offer['logo']))
+               @endif
+               @if(empty($offer['logo']))
                     @php $offer['logo'] = $offerSettings->default_image; @endphp
-                @endif
-                @php 
+               @endif
+               @php 
                     $totalPayoutGiven = $offer['payments'][0]['revenue'] ?? 0*$appDetails->currencyValue;
-                @endphp
-                @if($totalPayoutGiven>1)
-                    @php $totalPayoutGiven.=' '.$appDetails->currencyNameP; @endphp
-                @else 
-                    @php $totalPayoutGiven.=' '.$appDetails->currencyName; @endphp
-                @endif
+               @endphp
+               @if($totalPayoutGiven>1)
+                  @php $totalPayoutGiven.=' '.$appDetails->currencyNameP; @endphp
+               @else 
+                  @php $totalPayoutGiven.=' '.$appDetails->currencyName; @endphp
+               @endif
                <div class="boxList trigger openPopupDetail" 
                 redirect-link="{{ $redirectlink }}" 
                 description="{{ $descriptionOffer }}" 
