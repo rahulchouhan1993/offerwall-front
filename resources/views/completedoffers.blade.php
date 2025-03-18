@@ -78,6 +78,29 @@
                         $totalPayoutGiven = $offer['payments'][0]['revenue'] ?? 0*$appDetails->currencyValue;
                     @endphp
                     @if($totalPayoutGiven>1)
+                        @if ($appDetails->rounding==1)
+                        @php
+                            $rounded = round($totalPayoutGiven, 1);
+                            if ($rounded > 0 && $rounded < 0.1) {
+                                $totalPayoutGiven = 0.1; 
+                            }else{
+                                $totalPayoutGiven = ($totalPayoutGiven > floor($totalPayoutGiven)) ? $totalPayoutGiven : floor($totalPayoutGiven);
+                            }
+                        @endphp
+                        @elseif ($appDetails->rounding==2)
+                        @php
+                            $rounded = round($totalPayoutGiven, 2);
+                            if ($rounded > 0 && $rounded < 0.1) {
+                                $totalPayoutGiven = 0.1; 
+                            }else{
+                                $totalPayoutGiven = ($totalPayoutGiven > floor($totalPayoutGiven)) ? $totalPayoutGiven : floor($totalPayoutGiven);
+                            }
+                        @endphp
+                        @else
+                        @php
+                            $totalPayoutGiven = round($totalPayoutGiven);
+                        @endphp
+                        @endif
                         @php $totalPayoutGiven.=' '.$appDetails->currencyNameP; @endphp
                     @else 
                         @php $totalPayoutGiven.=' '.$appDetails->currencyName; @endphp
