@@ -85,14 +85,6 @@
                   $countryAllowed = empty($offer['targeting'][0]['country']['allow']) || in_array($userCountry, $offer['targeting'][0]['country']['allow']);
                @endphp
                @if($deviceAllowed && $countryAllowed)
-               @php 
-                    $ufto = base64_encode($offer['link']);
-                    $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.base64_encode($appDetails->appId).'&vstr='.base64_encode($cookieValue);
-                    $descriptionOffer = html_entity_decode(strip_tags($offer['description_lang']['en']));
-               @endphp
-               @if(empty($descriptionOffer))
-                    @php $descriptionOffer = $offerSettings->default_description; @endphp
-               @endif
                @if(empty($offer['logo']))
                     @php $offer['logo'] = $offerSettings->default_image; @endphp
                @endif
@@ -126,6 +118,14 @@
                   @php $totalPayoutGiven.=' '.$appDetails->currencyNameP; @endphp
                @else 
                   @php $totalPayoutGiven.=' '.$appDetails->currencyName; @endphp
+               @endif
+               @php 
+                  $ufto = base64_encode($offer['link']);
+                  $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.base64_encode($appDetails->appId).'&vstr='.base64_encode($cookieValue).'&offer_name='.$offer['title'].'&reward='.$totalPayoutGiven;
+                  $descriptionOffer = html_entity_decode(strip_tags($offer['description_lang']['en']));
+               @endphp
+               @if(empty($descriptionOffer))
+                    @php $descriptionOffer = $offerSettings->default_description; @endphp
                @endif
                <div class="boxList trigger openPopupDetail" 
                 redirect-link="{{ $redirectlink }}" 

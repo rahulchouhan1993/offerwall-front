@@ -88,6 +88,8 @@ class DashboardController extends Controller
             $trackingData->visitor_id = $_COOKIE['userCookie'];
             $trackingData->app_id = $appDetails->id;
             $trackingData->offer_id = $affiseOfferId;
+            $trackingData->offer_name = $request->offer_name;
+            $trackingData->reward = $request->reward;
             $trackingData->user_id = $appDetails->affiliateId;
             $trackingData->affiliate_id = $userDetails->affiseId;
             $trackingData->save();
@@ -186,21 +188,22 @@ class DashboardController extends Controller
 
                                     //defining postback url with parameters
                                     $replacements = [
-                                        '{visitor_id}' => $TrackingDetails->visitor_id,
-                                        '{ip}' => $TrackingDetails->ip,
-                                        '{user_agent}' => $TrackingDetails->ua,
+                                        '{user_id}' => $TrackingDetails->visitor_id,
+                                        '{reward}' => $TrackingDetails->reward,
+                                        '{status}' => 'Approved',
+                                        '{payout}' => $value['payouts'],
+                                        '{offer_id}' => $TrackingDetails->offer_id,
+                                        '{offer_name}' => $TrackingDetails->offer_name,
+                                        '{goal}' => $TrackingDetails->goal,
                                         '{device_type}' => $TrackingDetails->device_type,
+                                        '{geo}' => $TrackingDetails->country_code,
+                                        '{ip}' => $TrackingDetails->ip,
+                                        '{os}' => $TrackingDetails->device_os,
+                                        '{user_agent}' => $TrackingDetails->ua,
                                         '{sub1}' => $TrackingDetails->click_id,
                                         '{sub2}' => 'offerwall',
                                         '{sub3}' => $TrackingDetails->app_id,
-                                        '{sub4}' => $TrackingDetails->id,
-                                        '{offer_id}' => $TrackingDetails->offer_id,
-                                        '{status}' => 'confirmed',
-                                        '{payout}' => $value['payouts'],
-                                        '{geo}' => $TrackingDetails->country_code,
-                                        '{goal}' => $TrackingDetails->country_code,
-                                        '{currency}' => '$',
-                                        '{os}' => $TrackingDetails->device_os,
+                                        '{sub4}' => $TrackingDetails->id
                                     ];
                                     
                                     $postbackUrl = strtr($appDetail->postback, $replacements);                                    
