@@ -200,10 +200,8 @@ class DashboardController extends Controller
                                         '{ip}' => $TrackingDetails->ip,
                                         '{os}' => $TrackingDetails->device_os,
                                         '{user_agent}' => $TrackingDetails->ua,
-                                        '{sub1}' => $TrackingDetails->click_id,
-                                        '{sub2}' => 'offerwall',
-                                        '{sub3}' => $TrackingDetails->app_id,
-                                        '{sub4}' => $TrackingDetails->id
+                                        '{click_id}' => $TrackingDetails->click_id,
+                                        '{app_id}' => $TrackingDetails->app_id
                                     ];
                                     
                                     $postbackUrl = strtr($appDetail->postback, $replacements);                                    
