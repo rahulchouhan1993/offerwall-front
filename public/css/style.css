@@ -44,9 +44,6 @@ nav.navbar.navbar-expand-lg{background:#151515 !important;position:fixed;top:0;l
 nav.navbar ul.navbar-nav li.nav-item .nav-link{font-size:18px;font-weight:500;color:#796B78;text-transform:uppercase;}
 nav.navbar ul.navbar-nav li.nav-item{margin-right:30px;}
 nav.navbar ul.navbar-nav li.nav-item .nav-link.inSection{color:#fff;background:url(../images/activeline.svg)center bottom no-repeat;}
-
-
-
 h2.hmTitle{font-size:20px;color:#796B78;font-weight:500;text-transform:uppercase;margin:0 0 35px;letter-spacing:2px;}
 h3.hmHeading{font-size:60px;font-weight:600;color:#D0ACA6;text-transform:uppercase;margin:0 0 5px;}
 h3.hmHeading span{font-weight:700;font-style:italic;}
@@ -69,13 +66,51 @@ footer{background:#0C0C0C;margin:50px 0 0;padding:70px 0 40px;}
 .footlink ul li a:hover,.footlink ul li a:focus{color:#fff;}
 .copyright{text-align:center;border-top:1px solid #272727;padding:40px 0 0;margin:30px 0 0;font-size:18px;font-weight:500;color:#796B78;}
 .copyright span{text-transform:uppercase;}
-/* .footnav .container{max-width:1300px;} */
-.contactform { max-width: 600px;}
-.contactform label { font-size: 17px; color: #796B78; font-weight: 400; margin: 0 0 5px; letter-spacing: 2px;}
-.contactform input,.contactform textarea { width: 100%; padding: 14px 15px; background: #151515; font-size: 15px; color: #ffffff; border: 1px solid #796B78; border-radius: 5px; }
-.contactform textarea { height: 120px;}
-.success {font-size: 18px; color: #e888de; margin: 0 0 30px; text-align: center; border: 1px solid #e888de; padding: 8px 5px; border-radius: 6px;}
-.pinkLabel strong { color: #e888de;}
+/* .footnav .container{max-width:1300px;}
+*/
+.contactform{max-width:600px;}
+.contactform label{font-size:17px;color:#796B78;font-weight:400;margin:0 0 5px;letter-spacing:2px;}
+.contactform input,.contactform textarea{width:100%;padding:14px 15px;background:#151515;font-size:15px;color:#ffffff;border:1px solid #796B78;border-radius:5px;}
+.contactform textarea{height:120px;}
+.success{font-size:18px;color:#e888de;margin:0 0 30px;text-align:center;border:1px solid #e888de;padding:8px 5px;border-radius:6px;}
+.pinkLabel strong{color:#e888de;}
+/* Fraud Tool Modal */
+.fraudToolModal .modal-dialog{max-width:900px;background:#000000;}
+.fraudicon{display:flex;align-items:center;justify-content:center;padding:0;background:#ffffff;width:80px;height:80px;margin:auto;border-radius:600px;}
+.fraudicon img{max-width:70px;}
+.fraudToolModal .modal-content{background:#fff;padding:25px 25px;border-radius:10px;border:none;}
+.fraudToolModal button.btn-close{position:absolute;right:-20px;top:-20px;width:30px;height:30px;background-color:#f44336;border-radius:60px;opacity:1;color:#fff;}
+.fraudToolModal button.btn-close:hover,.fraudToolModal button.btn-close:focus{outline:none;box-shadow:none;}
+.fraudHeading{text-align:center;font-family:'Open Sans';margin:10px 0 0;}
+.fraudHeading h2{font-size:29px;color:#f44336;font-weight:300;margin:0 0 12px;display:flex;align-items:center;justify-content:center;gap:5px;}
+.fraudHeading h3{font-size:15px;line-height:23px;color:#282828;font-weight:400;margin:0 0 30px;padding:0 110px;}
+.fraudHeading h2 svg{width:32px;}
+.blockersbx ul{display:flex;flex-wrap:wrap;align-items:flex-start;gap:0;}
+.blockersbx h4{margin:0 0 20px;text-align:left;font-size:20px;font-weight:300;color:#f44336;}
+.blockersbx ul li{position:relative;display:flex;align-items:flex-start;border-bottom:1px solid #f1f1f1;padding:6px 0;gap:6px;width:32%;min-height:87px;}
+.blockersbx ul li:last-child{border-bottom:none;}
+.blockicons img{max-width:40px;max-height:40px;object-fit:contain;}
+.blockText h2{font-size:15px;font-weight:400;margin:0 0 2px;color:#f44336;}
+.blockText h3{font-size:15px;font-weight:300;line-height:22px;color:#2c2c2c;}
+.blockicons img{max-width:40px;max-height:40px;object-fit:contain;}
+.actionReq{margin:15px 0 0;text-align:center;background:#F7D65E;padding:10px 10px;border-radius:5px;}
+.actionReq strong{color:#f00000;font-size:18px;font-weight:800;}
+.actionReq p{font-size:16px;color:#000;}
+.blockicons img{max-width:40px;max-height:40px;object-fit:contain;}
+.actionReq{margin:3px 0 0;text-align:center;background:#F7D65E;padding:5px 6px;border-radius:5px;}
+.actionReq strong{color:#f00000;font-size:15px;font-weight:600;}
+.actionReq p{font-size:13px;color:#000;margin:0;font-weight:400;}
+.thankcoop{text-align:center;color:#36962d;display:flex;justify-content:center;gap:5px;align-items:center;font-size:17px;font-weight:400;}
+.thankcoop svg{width:31px;}
+.checkmarkSelect{position:absolute;top:10px;right:10px;height:35px;width:35px;background-color:#ce68ce;border:1px solid #ce68ce;border-radius:40px;}
+.checkmarkSelect:before{content:'';left:14px;top:9px;width:6px;height:11px;border:solid white;border-width:0 2px 2px 0;transform:rotate(45deg);display:block;position:absolute;}
+.fraudHeading h4{display:flex;justify-content:center;align-items:center;font-size:19px;font-weight:300;color:#f44336;gap:7px;margin:0 0 20px;}
+.fraudHeading h4 svg{width:21px;fill:#f44336;}
+.interruptionsBx{max-width:100%;margin:0 0 10px;}
+.interruptionsBx ul{display:flex;align-items:flex-start;gap:50px;}
+.interruptionsBx ul li{width:32%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;color:#222222;line-height:17px;flex-direction:column;text-transform:capitalize;}
+.fraudiconbx img{max-width:30px;max-height:30px;object-fit:contain;}
+.fraudiconbx{width:60px;height:60px;border:1px solid #f44342;display:flex;align-items:center;justify-content:center;border-radius:200px;margin-bottom:11px;}
 /* Responsive */
 @media(min-width:1500px){.container{max-width:1440px;}
 }
@@ -124,6 +159,12 @@ p.hmPara{font-size:15px;}
 .pt50{padding-top:10px;}
 .innvosec{gap:10px;}
 .gap35{gap:20px;}
+/* Faurad Tool */
+.fraudToolModal .modal-dialog{width:90%;}
+.fraudToolModal .modal-content{padding:15px;}
+.fraudHeading h2{font-size:25px;}
+.fraudHeading h3{font-size:14px;padding:0 20px;}
+.blockersbx ul li{width:49%;}
 }
 @media(max-width:767px){.contact .btn{padding:11px 10px;font-size:12px;border-radius:2px;}
 h2.hmTitle{font-size:15px;}
@@ -142,8 +183,47 @@ p.hmPara{font-size:14px;padding:0;}
 .copyright{margin:10px 0 0;padding:10px 0 0;font-size:13px;}
 footer{padding:40px 0 10px;}
 .whowe p.hmPara{text-align:center;margin-bottom:5px;}
+/* fraud */
+.fraudicon{width:70px;height:70px;}
+.fraudicon img{max-width:60px;}
+.fraudHeading h2{font-size:22px;}
+.fraudHeading h2 svg{width:25px;}
+.interruptionsBx ul{        gap: 8px;
+    flex-direction: column;}
+.fraudiconbx{width:50px;height:50px;}
+.fraudiconbx img{max-width:20px;max-width:20px;}
+.blockersbx h4{font-size:16px;margin:0 0 15px;}
+.blockersbx ul li{width:100%;min-height:inherit;padding:10px 0;}
+.blockText h2{font-size:14px;}
+.blockText h3{font-size:14px;}
+.blockicons img{max-width:35px;max-height:35px;}
+.interruptionsBx ul li { width: 100%; margin: 0; flex-direction: row; justify-content: flex-start; align-items: center; text-align: left; gap: 8px; }
+.fraudiconbx { margin-bottom: 0; min-width: 40px; width: 40px; height: 40px;}
 }
 @media(max-width:575px){.innvbx{width:100%;}
 a.navbar-brand{max-width:140px;}
 .contact{margin-right:60px;}
+.fraudToolModal .modal-dialog{margin:40px auto;}
+.fraudToolModal button.btn-close{right:-3px;top:-15px;}
+.fraudHeading h2{font-size:15px;margin:0 0 6px;text-align:center;}
+.fraudHeading h3{padding:0;font-size:12px;line-height:18px;margin:0 0 12px;}
+.interruptionsBx ul{flex-wrap:wrap;justify-content:center;}
+
+.fraudicon{width:60px;height:60px;}
+.fraudicon img{max-width:45px;}
+.fraudHeading{margin:0;}
+.fraudHeading h2 svg{width:19px;}
+.fraudHeading h4{margin:0 0 8px;font-size:16px;gap:5px;}
+.fraudHeading h4 svg{width:16px;}
+.fraudToolModal .modal-body{padding:0;}
+.interruptionsBx ul li:last-child{margin:0;}
+.actionReq{padding:4px;border-radius:3px;}
+.actionReq strong{font-size:13px;}
+.actionReq p{font-size:12px;line-height:15px;}
+.thankcoop{font-size:13px;margin:10px 0 0;}
+.blockText h3{font-size:12px;line-height:16px;}
+.blockText h2{font-size:13px;margin:0 0 1px;}
+.blockicons img{max-width:25px;max-height:25px;}
+.blockersbx h4{font-size:15px;margin:0 0 4px;}
+.fraudToolModal button.btn-close{right:-6px;top:-15px;width:25px;height:25px;}
 }

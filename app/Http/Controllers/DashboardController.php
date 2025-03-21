@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $requestedParams = $request->all();
         if(!empty($request->apiKey) && !empty($request->wallId)){
             $affiliateRecord = User::where('api_key',$request->apiKey)->where('status',1)->first();
-            $appDetails = App::where('appId',base64_decode($request->wallId))->where('status',1)->first();
+            $appDetails = App::where('appId',$request->wallId)->where('status',1)->first();
             if(empty($affiliateRecord) || empty($appDetails)){
                 die('Invalid Details');
             }
@@ -80,7 +80,7 @@ class DashboardController extends Controller
         $fullQueryparam = parse_url($redirectingTo, PHP_URL_QUERY);
         parse_str($fullQueryparam, $paramValues);
         $affiseOfferId = $paramValues['offer_id'] ?? null;
-        $appId = base64_decode($request->query('wall'));
+        $appId = $request->query('wall');
         if (!empty($redirectingTo) && $appId>0) {
             $appDetails = App::where('appId',$appId)->first();
             $userDetails = User::find($appDetails->affiliateId);
@@ -185,7 +185,7 @@ class DashboardController extends Controller
                                     $TrackingDetails->revenue = $value['revenue'];
                                     $TrackingDetails->postback_sent = 1;
                                     $TrackingDetails->status = 1;
-
+                                    $TrackingDetails->signature = md5($TrackingDetails->visitor_id.$TrackingDetails->click_id.$TrackingDetails->id.$TrackingDetails->app_id.$appDetail->secret_key);
                                     //defining postback url with parameters
                                     $replacements = [
                                         '{user_id}' => $TrackingDetails->visitor_id,
@@ -201,7 +201,8 @@ class DashboardController extends Controller
                                         '{os}' => $TrackingDetails->device_os,
                                         '{user_agent}' => $TrackingDetails->ua,
                                         '{click_id}' => $TrackingDetails->click_id,
-                                        '{app_id}' => $TrackingDetails->app_id
+                                        '{app_id}' => $TrackingDetails->app_id,
+                                        '{tracking_id}' => $TrackingDetails->id
                                     ];
                                     
                                     $postbackUrl = strtr($appDetail->postback, $replacements);                                    
@@ -372,7 +373,7 @@ class DashboardController extends Controller
             }
         }
         
-        $appDetails = App::where('appId',base64_decode($request->wallId))->where('status',1)->first();
+        $appDetails = App::where('appId',$request->wallId)->where('status',1)->first();
         $offerWallTemplate = Template::where('app_id',$appDetails->id)->first();
         if(empty($offerWallTemplate)){
             $offerWallTemplate = Template::find(1);

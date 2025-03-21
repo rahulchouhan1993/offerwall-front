@@ -121,7 +121,7 @@
                @endif
                @php 
                   $ufto = base64_encode($offer['link']);
-                  $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.base64_encode($appDetails->appId).'&vstr='.base64_encode($cookieValue).'&offer_name='.$offer['title'].'&reward='.$totalPayoutGiven;
+                  $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.$appDetails->appId.'&vstr='.base64_encode($cookieValue).'&offer_name='.$offer['title'].'&reward='.$totalPayoutGiven;
                   $descriptionOffer = html_entity_decode(strip_tags($offer['description_lang']['en']));
                @endphp
                @if(empty($descriptionOffer))
