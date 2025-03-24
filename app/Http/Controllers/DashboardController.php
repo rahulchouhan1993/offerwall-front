@@ -185,7 +185,15 @@ class DashboardController extends Controller
                                     $TrackingDetails->revenue = $value['revenue'];
                                     $TrackingDetails->postback_sent = 1;
                                     $TrackingDetails->status = 1;
-                                    $TrackingDetails->signature = md5($TrackingDetails->visitor_id.$TrackingDetails->click_id.$TrackingDetails->id.$TrackingDetails->app_id.$appDetail->secret_key);
+
+                                    //creating signature
+                                    $signatureUserId= (strpos($appDetail->postback, '{user_id}') !== false) ? $TrackingDetails->visitor_id : null;
+                                    $signatureClickId = (strpos($appDetail->postback, '{click_id}') !== false) ? $TrackingDetails->click_id : null;
+                                    $signatureTrackingId = (strpos($appDetail->postback, '{tracking_id}') !== false) ? $TrackingDetails->id : null;
+                                    $signatureAppId = (strpos($appDetail->postback, '{app_id}') !== false) ? $TrackingDetails->app_id : null;
+                                    $TrackingDetails->signature = md5($signatureUserId.$signatureClickId.$signatureTrackingId.$signatureAppId.$appDetail->secrect_key);
+                                    //End
+
                                     //defining postback url with parameters
                                     $replacements = [
                                         '{user_id}' => $TrackingDetails->visitor_id,
@@ -205,7 +213,8 @@ class DashboardController extends Controller
                                         '{tracking_id}' => $TrackingDetails->id
                                     ];
                                     
-                                    $postbackUrl = strtr($appDetail->postback, $replacements);                                    
+                                    $postbackUrl = strtr($appDetail->postback, $replacements);      
+                                    $postbackUrl.= $postbackUrl.'&signature='.$TrackingDetails->signature;                              
                                     $TrackingDetails->postback_url = $postbackUrl;
 
                                     //fire postback on webmaster
