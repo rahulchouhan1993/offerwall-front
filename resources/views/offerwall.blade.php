@@ -89,7 +89,7 @@
                     @php $offer['logo'] = $offerSettings->default_image; @endphp
                @endif
                @php 
-                    $totalPayoutGiven = $offer['payments'][0]['revenue'] ?? 0*$appDetails->currencyValue;
+                    $totalPayoutGiven = $offer['payments'][0]['revenue']*$appDetails->currencyValue ?? 0*$appDetails->currencyValue;
                @endphp
                @if($totalPayoutGiven>1)
                   @if ($appDetails->rounding==1)
