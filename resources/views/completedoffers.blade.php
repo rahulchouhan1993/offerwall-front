@@ -7,7 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="images/favicon.png">
-    <title>Completed Offers</title>
+    <title>OfferwallXXX | Completed Offers</title>
+    <meta name="description" content="Get Rewarded!">
+    <meta name="author" content="OfferwallXXX">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Open Graph for Social Media -->
+    <meta property="og:title" content="OfferwallXXX">
+    <meta property="og:description" content="Get Rewarded!">
+    <meta property="og:image" content="images/favicon.png">
+    <meta property="og:url" content="{{ url()->current() }}">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="OfferwallXXX">
+    <meta name="twitter:description" content="Get Rewarded!">
+    <meta name="twitter:image" content="/images/favicon.png">
     <style>
         html{height:100%;}
         body{height:100%;margin:0;padding:0;}
