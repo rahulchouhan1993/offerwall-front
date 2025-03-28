@@ -104,7 +104,7 @@ class DashboardController extends Controller
         $previousDate = Carbon::yesterday()->toDateString();
         $currentDate = Carbon::today()->toDateString();
 
-        $clickUrl = $advertiserDetails->affise_endpoint . "stats/clicks?limit=1000&date_from={$previousDate}&date_to={$currentDate}";
+        $clickUrl = $advertiserDetails->affise_endpoint . "stats/clicks?limit=5000&date_from={$previousDate}&date_to={$currentDate}";
         $response = HTTP::withHeaders([
             'API-Key' =>  $advertiserDetails->affise_api_key,
         ])->get($clickUrl);
@@ -127,7 +127,8 @@ class DashboardController extends Controller
                             } else {
                                 $deviceType = 'Desktop';
                             }
-                            $deviceIsp = $this->getIsp($clickValue['ip']);
+                            // $deviceIsp = $this->getIsp($clickValue['ip']);
+                            $deviceIsp = 'Unknown';
                             if(!empty($validateTracking)){
                                 $validateTracking->country_code = $clickValue['country'];
                                 $validateTracking->country_name = $clickValue['country_name'];
