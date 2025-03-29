@@ -7,7 +7,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
       <link rel="icon" type="image/x-icon" href="images/favicon.png">
-      <title>OfferwallXXX | Active Offers</title>
+      <title>OfferwallXXX | Get Rewarded!</title>
       <meta name="description" content="Get Rewarded!">
       <meta name="author" content="OfferwallXXX">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -215,8 +215,8 @@
                </div>
                <div style="display: flex ; align-items: center; justify-content: space-between; width: 100%;">
                   <div style="">
-                     <h2 style="margin: 0 0 10px; font-family: 'Inter'; font-weight: 600; font-size: 16px; color: {{ $offerWallTemplate->offerText }};" id="offer-title-pop">--</h2>
-                     <h3 style="margin: 0 0 20px; font-family: 'Inter'; font-weight: 400; font-size: 16px; color: {{ $offerWallTemplate->offerText }};">Offer Requirments</h3>
+                     <h2 style="margin: 0 0 10px; font-family: 'Inter'; font-weight: 600; font-size: 18px; color: {{ $offerWallTemplate->offerText }};" id="offer-title-pop">--</h2>
+                     <h3 style="margin: 0 0 20px; font-family: 'Inter'; font-weight: 400; font-size: 15px; color: {{ $offerWallTemplate->offerText }};">Offer Requirements</h3>
                      {{-- <div style="display: flex ; gap: 10px; align-items: center; color: #757575; margin-bottom: 20px;">
                         <div style="font-size: 18px;font-family: 'Inter';color:{{ $offerWallTemplate->offerText }}" id="offer-category-pop">
                            --
@@ -225,7 +225,7 @@
                      <div style="width:100%" class="cntbx">
                         <p style="margin: 0; font-family: 'Inter'; font-size: 14px; color:{{ $offerWallTemplate->offerText }}" id="offer-description-pop">---</p>
                      </div>
-                     <a href="#" style="display: inline-block; padding: 10px 30px; border-radius: 60px; background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 18px; color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
+                     <a href="javascript;void(0);" style="display: inline-block; padding: 10px 30px; border-radius: 60px; background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px; color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
                   </div>
                </div>
             </div>

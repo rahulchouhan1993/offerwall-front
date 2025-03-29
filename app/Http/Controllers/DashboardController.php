@@ -101,61 +101,147 @@ class DashboardController extends Controller
 
     public function updateConversion(){
         $advertiserDetails = Setting::find(1);
+        $allActiveAffiliates = User::where('status',1)->where('role','affiliate')->get();
         $previousDate = Carbon::yesterday()->toDateString();
         $currentDate = Carbon::today()->toDateString();
 
-        $clickUrl = $advertiserDetails->affise_endpoint . "stats/clicks?limit=5000&date_from={$previousDate}&date_to={$currentDate}";
-        $response = HTTP::withHeaders([
-            'API-Key' =>  $advertiserDetails->affise_api_key,
-        ])->get($clickUrl);
-        if ($response->successful()) {
-            $allClicks = $response->json();
-            if(!empty($allClicks['clicks'])){
-                foreach($allClicks['clicks'] as $clicKey => $clickValue){
-                    if($clickValue['sub2']!='offerwall'){
-                        continue;
-                    }
-                    if($clickValue['sub4']>0 && $clickValue['sub3']>0){
-                        $ifAlreadyAdded = Tracking::where('click_id',$clickValue['click_id'])->first();
-                        if(empty($ifAlreadyAdded)){
-                            $validateTracking = Tracking::find($clickValue['sub4']);
-                            //Check device Type
-                            if (preg_match('/mobile/i', $clickValue['ua'])) {
-                                $deviceType = 'Mobile';
-                            } elseif (preg_match('/tablet|ipad|playbook|silk/i', $clickValue['ua'])) {
-                                $deviceType = 'Tablet';
-                            } else {
-                                $deviceType = 'Desktop';
+        if($allActiveAffiliates->isNotEmpty()){
+            foreach($allActiveAffiliates as $affiliate){
+                $affiliateAffiseId = $affiliate->affiseId;
+                $clickUrl = $advertiserDetails->affise_endpoint . "stats/clicks?limit=500&date_from={$previousDate}&date_to={$currentDate}&partner[]={$affiliateAffiseId}";
+                $response = HTTP::withHeaders([
+                    'API-Key' =>  $advertiserDetails->affise_api_key,
+                ])->get($clickUrl);
+                if ($response->successful()) {
+                    $allClicks = $response->json();
+                    if(!empty($allClicks['clicks'])){
+                        foreach($allClicks['clicks'] as $clicKey => $clickValue){
+                            if($clickValue['sub2']!='offerwall'){
+                                continue;
                             }
-                            // $deviceIsp = $this->getIsp($clickValue['ip']);
-                            $deviceIsp = 'Unknown';
-                            if(!empty($validateTracking)){
-                                $validateTracking->country_code = $clickValue['country'];
-                                $validateTracking->country_name = $clickValue['country_name'];
-                                $validateTracking->browser = $clickValue['browser'];
-                                $validateTracking->device_brand = $clickValue['device'];
-                                $validateTracking->device_model = $clickValue['device_model'];
-                                $validateTracking->device_os = $clickValue['os'];
-                                $validateTracking->device_type = $deviceType;
-                                $validateTracking->isp = $deviceIsp;
-                                $validateTracking->ip = $clickValue['ip'];
-                                $validateTracking->ua = $clickValue['ua'];
-                                $validateTracking->goal = NULL;
-                                $validateTracking->click_id = $clickValue['click_id'];
-                                $validateTracking->click_time = $clickValue['created_at'];
-                                $validateTracking->conversion_id = NULL;
-                                $validateTracking->conversion_time = NULL;
-                                $validateTracking->payout = NULL;
-                                $validateTracking->revenue = NULL;
-                                $validateTracking->status = 0;
-                                $validateTracking->postback_sent = 0;
-                                $validateTracking->save();
-                            }else{
-                                $errorTracking = new ConversionErrorTracker();
-                                $errorTracking->offer_id = $clickValue['offer']['id'];
-                                $errorTracking->click_id = $clickValue['click_id'];
-                                $errorTracking->conversion_id = NULL;
-                                $errorTracking->save();
+                            if($clickValue['sub4']>0 && $clickValue['sub3']>0){
+                                $ifAlreadyAdded = Tracking::where('click_id',$clickValue['click_id'])->first();
+                                if(empty($ifAlreadyAdded)){
+                                    $validateTracking = Tracking::find($clickValue['sub4']);
+                                    //Check device Type
+                                    if (preg_match('/mobile/i', $clickValue['ua'])) {
+                                        $deviceType = 'Mobile';
+                                    } elseif (preg_match('/tablet|ipad|playbook|silk/i', $clickValue['ua'])) {
+                                        $deviceType = 'Tablet';
+                                    } else {
+                                        $deviceType = 'Desktop';
+                                    }
+                                    //$deviceIsp = $this->getIsp($clickValue['ip']);
+                                    $deviceIsp = 'Unknown';
+                                    if(!empty($validateTracking)){
+                                        $validateTracking->country_code = $clickValue['country'];
+                                        $validateTracking->country_name = $clickValue['country_name'];
+                                        $validateTracking->browser = $clickValue['browser'];
+                                        $validateTracking->device_brand = $clickValue['device'];
+                                        $validateTracking->device_model = $clickValue['device_model'];
+                                        $validateTracking->device_os = $clickValue['os'];
+                                        $validateTracking->device_type = $deviceType;
+                                        $validateTracking->isp = $deviceIsp;
+                                        $validateTracking->ip = $clickValue['ip'];
+                                        $validateTracking->ua = $clickValue['ua'];
+                                        $validateTracking->goal = NULL;
+                                        $validateTracking->click_id = $clickValue['click_id'];
+                                        $validateTracking->click_time = $clickValue['created_at'];
+                                        $validateTracking->conversion_id = NULL;
+                                        $validateTracking->conversion_time = NULL;
+                                        $validateTracking->payout = NULL;
+                                        $validateTracking->revenue = NULL;
+                                        $validateTracking->status = 0;
+                                        $validateTracking->postback_sent = 0;
+                                        $validateTracking->save();
+                                    }else{
+                                        $errorTracking = new ConversionErrorTracker();
+                                        $errorTracking->offer_id = $clickValue['offer']['id'];
+                                        $errorTracking->click_id = $clickValue['click_id'];
+                                        $errorTracking->conversion_id = NULL;
+                                        $errorTracking->save();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            
+                //updating the conversions of all added clicks
+                $url = $advertiserDetails->affise_endpoint . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2=offerwall&partner[]={$affiliateAffiseId}";
+                $response = HTTP::withHeaders([
+                    'API-Key' => $advertiserDetails->affise_api_key,
+                ])->get($url);
+                if ($response->successful()) {
+                    $allConversion = $response->json();
+                    if(!empty($allConversion['conversions'])){
+                        foreach($allConversion['conversions'] as $key => $value){
+                            if($value['sub2']=='offerwall'){
+                                if($value['sub3']>0 && $value['sub4']>0){
+                                    $ifAlreadyAdded = Tracking::where('conversion_id',$value['conversion_id'])->first();
+                                    if(empty($ifAlreadyAdded)){
+                                        $TrackingDetails = Tracking::find($value['sub4']);
+                                        if (!empty($TrackingDetails)) {
+                                            $appDetail = App::find($TrackingDetails->app_id);
+                                            $TrackingDetails->conversion_id = $value['conversion_id'];
+                                            $TrackingDetails->conversion_time = $value['created_at'];
+                                            $TrackingDetails->payout = $value['payouts'];
+                                            $TrackingDetails->revenue = $value['revenue'];
+                                            $TrackingDetails->postback_sent = 1;
+                                            $TrackingDetails->status = 1;
+
+                                            //creating signature
+                                            $signatureUserId= (strpos($appDetail->postback, '{user_id}') !== false) ? $TrackingDetails->visitor_id : null;
+                                            $signatureClickId = (strpos($appDetail->postback, '{click_id}') !== false) ? $TrackingDetails->click_id : null;
+                                            $signatureTrackingId = (strpos($appDetail->postback, '{tracking_id}') !== false) ? $TrackingDetails->id : null;
+                                            $signatureAppId = (strpos($appDetail->postback, '{app_id}') !== false) ? $TrackingDetails->app_id : null;
+                                            $TrackingDetails->signature = md5($signatureUserId.$signatureClickId.$signatureTrackingId.$signatureAppId.$appDetail->secrect_key);
+                                            //End
+
+                                            //defining postback url with parameters
+                                            $replacements = [
+                                                '{user_id}' => $TrackingDetails->visitor_id,
+                                                '{reward}' => $TrackingDetails->reward,
+                                                '{status}' => 'Approved',
+                                                '{payout}' => $value['payouts'],
+                                                '{offer_id}' => $TrackingDetails->offer_id,
+                                                '{offer_name}' => $TrackingDetails->offer_name,
+                                                '{goal}' => $TrackingDetails->goal,
+                                                '{device_type}' => $TrackingDetails->device_type,
+                                                '{geo}' => $TrackingDetails->country_code,
+                                                '{ip}' => $TrackingDetails->ip,
+                                                '{os}' => $TrackingDetails->device_os,
+                                                '{user_agent}' => $TrackingDetails->ua,
+                                                '{click_id}' => $TrackingDetails->click_id,
+                                                '{app_id}' => $TrackingDetails->app_id,
+                                                '{tracking_id}' => $TrackingDetails->id
+                                            ];
+                                            
+                                            $postbackUrl = strtr($appDetail->postback, $replacements);      
+                                            $postbackUrl.= $postbackUrl.'&signature='.$TrackingDetails->signature;                              
+                                            $TrackingDetails->postback_url = $postbackUrl;
+
+                                            //fire postback on webmaster
+                                            $postBackStatus = $this->sendPostback($postbackUrl);
+                                            $TrackingDetails->http_code = $postBackStatus['http_code'] ?? '500';
+                                            $TrackingDetails->error = $postBackStatus['error'] ?? NULL;
+                                            //end
+                                            $TrackingDetails->save();
+                                        }else{
+                                            $errorTracking = new ConversionErrorTracker();
+                                            $errorTracking->offer_id = $value['offer_id'];
+                                            $errorTracking->click_id = $value['clickid'];
+                                            $errorTracking->conversion_id = $value['conversion_id'].'---0';
+                                            $errorTracking->save();
+                                        }
+                                    }
+                                }else{
+                                    $errorTracking = new ConversionErrorTracker();
+                                    $errorTracking->offer_id = $value['offer_id'];
+                                    $errorTracking->click_id = $value['clickid'];
+                                    $errorTracking->conversion_id = $value['conversion_id'];
+                                    $errorTracking->save();
+                                }
                             }
                         }
                     }
@@ -163,86 +249,7 @@ class DashboardController extends Controller
             }
         }
         
-       
-        //updating the conversions of all added clicks
-        $url = $advertiserDetails->affise_endpoint . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2=offerwall";
-        $response = HTTP::withHeaders([
-            'API-Key' => $advertiserDetails->affise_api_key,
-        ])->get($url);
-        if ($response->successful()) {
-            $allConversion = $response->json();
-            if(!empty($allConversion['conversions'])){
-                foreach($allConversion['conversions'] as $key => $value){
-                    if($value['sub2']=='offerwall'){
-                        if($value['sub3']>0 && $value['sub4']>0){
-                            $ifAlreadyAdded = Tracking::where('conversion_id',$value['conversion_id'])->first();
-                            if(empty($ifAlreadyAdded)){
-                                $TrackingDetails = Tracking::find($value['sub4']);
-                                if (!empty($TrackingDetails)) {
-                                    $appDetail = App::find($TrackingDetails->app_id);
-                                    $TrackingDetails->conversion_id = $value['conversion_id'];
-                                    $TrackingDetails->conversion_time = $value['created_at'];
-                                    $TrackingDetails->payout = $value['payouts'];
-                                    $TrackingDetails->revenue = $value['revenue'];
-                                    $TrackingDetails->postback_sent = 1;
-                                    $TrackingDetails->status = 1;
-
-                                    //creating signature
-                                    $signatureUserId= (strpos($appDetail->postback, '{user_id}') !== false) ? $TrackingDetails->visitor_id : null;
-                                    $signatureClickId = (strpos($appDetail->postback, '{click_id}') !== false) ? $TrackingDetails->click_id : null;
-                                    $signatureTrackingId = (strpos($appDetail->postback, '{tracking_id}') !== false) ? $TrackingDetails->id : null;
-                                    $signatureAppId = (strpos($appDetail->postback, '{app_id}') !== false) ? $TrackingDetails->app_id : null;
-                                    $TrackingDetails->signature = md5($signatureUserId.$signatureClickId.$signatureTrackingId.$signatureAppId.$appDetail->secrect_key);
-                                    //End
-
-                                    //defining postback url with parameters
-                                    $replacements = [
-                                        '{user_id}' => $TrackingDetails->visitor_id,
-                                        '{reward}' => $TrackingDetails->reward,
-                                        '{status}' => 'Approved',
-                                        '{payout}' => $value['payouts'],
-                                        '{offer_id}' => $TrackingDetails->offer_id,
-                                        '{offer_name}' => $TrackingDetails->offer_name,
-                                        '{goal}' => $TrackingDetails->goal,
-                                        '{device_type}' => $TrackingDetails->device_type,
-                                        '{geo}' => $TrackingDetails->country_code,
-                                        '{ip}' => $TrackingDetails->ip,
-                                        '{os}' => $TrackingDetails->device_os,
-                                        '{user_agent}' => $TrackingDetails->ua,
-                                        '{click_id}' => $TrackingDetails->click_id,
-                                        '{app_id}' => $TrackingDetails->app_id,
-                                        '{tracking_id}' => $TrackingDetails->id
-                                    ];
-                                    
-                                    $postbackUrl = strtr($appDetail->postback, $replacements);      
-                                    $postbackUrl.= $postbackUrl.'&signature='.$TrackingDetails->signature;                              
-                                    $TrackingDetails->postback_url = $postbackUrl;
-
-                                    //fire postback on webmaster
-                                    $postBackStatus = $this->sendPostback($postbackUrl);
-                                    $TrackingDetails->http_code = $postBackStatus['http_code'] ?? '500';
-                                    $TrackingDetails->error = $postBackStatus['error'] ?? NULL;
-                                    //end
-                                    $TrackingDetails->save();
-                                }else{
-                                    $errorTracking = new ConversionErrorTracker();
-                                    $errorTracking->offer_id = $value['offer_id'];
-                                    $errorTracking->click_id = $value['clickid'];
-                                    $errorTracking->conversion_id = $value['conversion_id'].'---0';
-                                    $errorTracking->save();
-                                }
-                            }
-                        }else{
-                            $errorTracking = new ConversionErrorTracker();
-                            $errorTracking->offer_id = $value['offer_id'];
-                            $errorTracking->click_id = $value['clickid'];
-                            $errorTracking->conversion_id = $value['conversion_id'];
-                            $errorTracking->save();
-                        }
-                    }
-                }
-            }
-        }
+        die('done');
     }
 
     public function sendPostback($url){
