@@ -7,22 +7,23 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
       <link rel="icon" type="image/x-icon" href="images/favicon.png">
-      <title>OfferwallXXX | Get Rewarded!</title>
+      <title>Offawall | Get Rewarded!</title>
       <meta name="description" content="Get Rewarded!">
-      <meta name="author" content="OfferwallXXX">
+      <meta name="author" content="Offawall">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
       <!-- Open Graph for Social Media -->
-      <meta property="og:title" content="OfferwallXXX">
+      <meta property="og:title" content="Offawall">
       <meta property="og:description" content="Get Rewarded!">
       <meta property="og:image" content="images/favicon.png">
       <meta property="og:url" content="{{ url()->current() }}">
       
       <!-- Twitter Card -->
       <meta name="twitter:card" content="summary_large_image">
-      <meta name="twitter:title" content="OfferwallXXX">
+      <meta name="twitter:title" content="Offawall">
       <meta name="twitter:description" content="Get Rewarded!">
       <meta name="twitter:image" content="/images/favicon.png">
+      <link rel="stylesheet" href="css/style.css?dfgdg">
       <style>
          html{height:100%;}
          body{height:100%;margin:0;padding:0;}
@@ -36,8 +37,9 @@
          .cntbx::-webkit-scrollbar-thumb:hover{background:#555;}
          /* mdal */
          .modal{position:fixed;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);opacity:0;visibility:hidden;transform:scale(1.1);transition:visibility 0s linear 0.25s,opacity 0.25s 0s,transform 0.25s;}
-         .modal-content{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background-color:{{ $offerWallTemplate->offerBg }};padding:1rem 1.5rem;width:90%; max-width: 45rem;border-radius:0.5rem;}
+         .modal-content{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background-color:{{ $offerWallTemplate->offerBg }};padding:1rem 1rem;width:94%; max-width: 430px;border-radius:0.5rem;}
          .close-button{text-align: center; cursor: pointer; width: 35px; height: 35px; background: #dc4848; display: flex ; position: absolute; right: -10px; top: -10px; font-size: 25px; align-items: center; justify-content: center; border-radius: 60px; color: #fff; border: 1px solid #dc4848;}
+         .close-button svg {width: 17px;}
          .close-button:hover{background-color:#fff; color:#000}
          .show-modal{opacity:1;visibility:visible;transform:scale(1.0);transition:visibility 0s linear 0s,opacity 0.25s 0s,transform 0.25s;}
          .trigger { cursor: pointer;}
@@ -208,15 +210,15 @@
       </div>
       <div class="modal" id="offerDetailsPop" tabindex="-1" aria-hidden="true">
          <div class="modal-content">
-            <span class="close-button">×</span>
+            <span class="close-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5859 12L2.79297 4.20706L4.20718 2.79285L12.0001 10.5857L19.793 2.79285L21.2072 4.20706L13.4143 12L21.2072 19.7928L19.793 21.2071L12.0001 13.4142L4.20718 21.2071L2.79297 19.7928L10.5859 12Z"></path></svg></span>
             <div class="modalbx" style="display: flex ; align-items: center; justify-content: flex-start; gap: 20px;">
-               <div style="display: flex ; align-items: center; width: 25%;">
+               <div style="display: flex ; align-items: center; width: 33%;">
                   <img id="offer-image-pop" src="{{ $offer['logo'] }}" alt="img" style="width: 100%; max-width: 100%; object-fit: cover;" />
                </div>
                <div style="display: flex ; align-items: center; justify-content: space-between; width: 100%;">
                   <div style="">
-                     <h2 style="margin: 0 0 10px; font-family: 'Inter'; font-weight: 600; font-size: 18px; color: {{ $offerWallTemplate->offerText }};" id="offer-title-pop">--</h2>
-                     <h3 style="margin: 0 0 20px; font-family: 'Inter'; font-weight: 400; font-size: 15px; color: {{ $offerWallTemplate->offerText }};">Offer Requirements</h3>
+                     <h2 style="margin: 0 0 5px; font-family: 'Inter'; font-weight: 600; font-size: 18px; color: {{ $offerWallTemplate->offerText }};" id="offer-title-pop">--</h2>
+                     <h3 style="margin: 0 0 10px; font-family: 'Inter'; font-weight: 400; font-size: 15px; color: {{ $offerWallTemplate->offerText }};">Offer <span style="color:#0ee346">Requirements</span></h3>
                      {{-- <div style="display: flex ; gap: 10px; align-items: center; color: #757575; margin-bottom: 20px;">
                         <div style="font-size: 18px;font-family: 'Inter';color:{{ $offerWallTemplate->offerText }}" id="offer-category-pop">
                            --
@@ -232,7 +234,7 @@
          </div>
       </div>
 
-      <div class="modal fade fraudToolModal" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal fade fraudToolModal" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
          <div class="modal-dialog  modal-dialog-centered">
            
            <div class="modal-content">
@@ -334,6 +336,12 @@
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
       <!-- Modal -->
       <script>
+         var isVpn = '{{ $isVpn }}';
+         $(document).ready(function(){
+            if(isVpn){
+               $('.fraudToolModal').addClass('show-modal');
+            }
+         })
          $(document).on('click', '.openPopupDetail', function () {
              $('#offerDetailsPop').addClass('show-modal'); 
              var redirectLink = $(this).attr('redirect-link')

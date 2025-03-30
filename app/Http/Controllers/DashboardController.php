@@ -60,7 +60,31 @@ class DashboardController extends Controller
         }else{
             die('Not a valid request');
         }
-        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry'));
+        $isVpn = $this->checkVpn();
+        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry','isVpn'));
+    }
+
+    public function checkVpn()
+    {
+        $ip = request()->ip();
+        $isVpn = false;
+        $response = file_get_contents("http://ip-api.com/json/{$ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,proxy,query");
+        $data = json_decode($response, true);
+        if (!empty($data['proxy']) && $data['proxy'] === true) {
+            $isVpn = true;
+        }
+
+        // Check known VPN ISPs
+        $vpnProviders = ["NordVPN", "ExpressVPN", "CyberGhost", "ProtonVPN", "Surfshark"];
+        if (isset($data['isp']) && in_array($data['isp'], $vpnProviders)) {
+            $isVpn = true;
+        }
+
+        // Check AS number (many VPNs use specific ASNs)
+        // if (isset($data['as']) && strpos($data['as'], "AS") !== false) {
+        //     $isVpn = true;
+        // }
+        return $isVpn;
     }
 
     function checkAndSetCookie()

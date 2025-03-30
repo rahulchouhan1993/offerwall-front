@@ -13,7 +13,9 @@
         "ipinfo/ipinfo": "^3.1",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.31",
-        "laravel/tinker": "^2.9"
+        "laravel/tinker": "^2.9",
+        "predis/predis": "^2.3",
+        "torann/geoip": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
