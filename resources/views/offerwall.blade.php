@@ -227,7 +227,7 @@
                      <div style="width:100%" class="cntbx">
                         <p style="margin: 0; font-family: 'Inter'; font-size: 14px; color:{{ $offerWallTemplate->offerText }}" id="offer-description-pop">---</p>
                      </div>
-                     <a href="javascript;void(0);" style="display: inline-block; padding: 10px 30px; border-radius: 60px; background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px; color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
+                     <a href="javascript;void(0);" style="display: inline-block; padding: 10px 30px;  background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px; color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
                   </div>
                </div>
             </div>
