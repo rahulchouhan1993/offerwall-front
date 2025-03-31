@@ -218,7 +218,7 @@
                <div style="display: flex ; align-items: center; justify-content: space-between; width: 100%;">
                   <div style="">
                      <h2 style="margin: 0 0 5px; font-family: 'Inter'; font-weight: 600; font-size: 18px; color: {{ $offerWallTemplate->offerText }};" id="offer-title-pop">--</h2>
-                     <h3 style="margin: 0 0 10px; font-family: 'Inter'; font-weight: 400; font-size: 15px; color: {{ $offerWallTemplate->offerText }};">Offer <span style="color:#0ee346">Requirements</span></h3>
+                     <h3 style="margin: 0 0 10px; font-family: 'Inter'; font-weight: 400; font-size: 15px; color: {{ $offerWallTemplate->offerText }};">Offer Requirements</h3>
                      {{-- <div style="display: flex ; gap: 10px; align-items: center; color: #757575; margin-bottom: 20px;">
                         <div style="font-size: 18px;font-family: 'Inter';color:{{ $offerWallTemplate->offerText }}" id="offer-category-pop">
                            --
