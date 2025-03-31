@@ -13,5 +13,6 @@ Route::get('/server-postbacks',[DashboardController::class,'serverPostbacks'])->
 Route::post('/contact',[DashboardController::class,'submitContact'])->name('contact.submit');
 Route::get('/check-cookie', [DashboardController::class, 'checkAndSetCookie']);
 Route::get('/completedOffers', [DashboardController::class, 'completedOffers'])->name('completedOffers');
+Route::get('/blocked',[DashboardController::class,'blocked'])->name('blocked');
 
 

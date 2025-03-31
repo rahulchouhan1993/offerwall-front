@@ -9,14 +9,19 @@ use App\Models\Template;
 use App\Models\Setting;
 use App\Models\Contact;
 use App\Models\Tracking;
+use App\Models\AppBlocker;
 use App\Models\ConversionErrorTracker;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cookie;
 use Carbon\Carbon;
 class DashboardController extends Controller
 {
     public function index(Request $request){
+        $userCountry = $this->getUserCountry(request()->ip());
+        $allBlockers = $this->GetBlockers($userCountry);
+        if($allBlockers['country']){
+            return redirect()->route('blocked');
+        }
         $cookieValue = NULL;
         $requestedParams = $request->all();
         if(!empty($request->apiKey) && !empty($request->wallId)){
@@ -41,7 +46,6 @@ class DashboardController extends Controller
                     $deviceType = 'desktop';
                 }
                 
-                $userCountry = $this->getUserCountry(request()->ip());
                 //End
                 $url = $offerSettings->affise_endpoint . "partner/offers?sort[epc]=desc&limit=50&countries[]=$userCountry";
                 $response = HTTP::withHeaders([
@@ -60,8 +64,45 @@ class DashboardController extends Controller
         }else{
             die('Not a valid request');
         }
-        $isVpn = $this->checkVpn();
+        
+        if($allBlockers['vpn']){
+            $isVpn = $this->checkVpn();
+        }else{
+            $isVpn = false;
+        }
         return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry','isVpn'));
+    }
+
+    public function GetBlockers($userCountry){
+        $vpnBlocker = AppBlocker::where('id',1)->where('enabled',1)->first();
+        $rootedBlocker = AppBlocker::where('id',2)->where('enabled',1)->first();
+        $termuxBlocker = AppBlocker::where('id',3)->where('enabled',1)->first();
+        $emulatorBlocker = AppBlocker::where('id',4)->where('enabled',1)->first();
+        $countryBlocker = AppBlocker::where('id',5)->where('enabled',1)->whereJsonContains('countries',$userCountry)->first();
+        $enabledBlockers = [
+            'vpn' => false,
+            'rooted' => false,
+            'termux' => false,
+            'emulator' => false,
+            'country' => false,
+        ];
+        if($vpnBlocker){
+            $enabledBlockers['vpn']=  true;
+        }
+        if($rootedBlocker){
+            $enabledBlockers['rooted']=  true;
+        }
+        if($termuxBlocker){
+            $enabledBlockers['termux']=  true;
+        }
+        if($emulatorBlocker){
+            $enabledBlockers['emulator']=  true;
+        }
+        if($countryBlocker){
+            $enabledBlockers['country']=  true;
+        }
+
+        return $enabledBlockers;
     }
 
     public function checkVpn()
@@ -432,6 +473,10 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    public function blocked(){
+        return view('blocked');
     }
 
 }
