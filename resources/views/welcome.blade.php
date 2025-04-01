@@ -58,7 +58,7 @@
                  </li>
                </div>
                <div class="contact">
-                  <a href="https://makamobile.affise.com/v2/sign/up" class="btn btn-primary">Sign In</a>
+                  <a href="https://affiliate.offerwallxxx.com/" class="btn btn-primary">Sign In</a>
                </div>
             </div>
          </nav>

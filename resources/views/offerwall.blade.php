@@ -94,7 +94,7 @@
             <div class="cntmainbx" style="width:100%; display: flex; flex-direction: column; align-items: flex-start; gap: 15px; padding: 60px; padding-bottom: 80px; background: {{ $offerWallTemplate->bodyBg }};">
                @foreach ($allOffers['offers'] as $offer)
                @php
-                  $checkIfAlredyCliced = Tracking::where('offer_id',$offer['id'])->where('visitor_id',$cookieValue)->first();
+                  $checkIfAlredyCliced = Tracking::where('offer_id',$offer['id'])->where('visitor_id',$cookieValue)->whereNotNull('conversion_id')->first();
                   if(!empty($checkIfAlredyCliced)){
                      continue;
                   }
@@ -227,7 +227,7 @@
                      <div style="width:100%" class="cntbx">
                         <p style="margin: 0; font-family: 'Inter'; font-size: 14px; color:{{ $offerWallTemplate->offerText }}" id="offer-description-pop">---</p>
                      </div>
-                     <a href="javascript;void(0);" style="display: inline-block; padding: 10px 30px;  background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px; color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
+                     <a target="_blank" href="javascript;void(0);" style="display: inline-block; padding: 10px 30px;  background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px; color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
                   </div>
                </div>
             </div>
@@ -236,102 +236,66 @@
 
       <div class="modal fade fraudToolModal" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
          <div class="modal-dialog  modal-dialog-centered">
-           
-           <div class="modal-content">
-           <div class="fraudicon"><img src="images/fraudicon.png" alt=""></div>
-           <div class="fraudHeading">
-              <h2><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z"></path></svg> Fraud Detection Tools Detected!</h2>   
-              <h3>We have detected that you are using fraud detection or privacy tools that may interfere with the proper functioning of our website.</h3>
-              <h4><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5.76282 17H20V5H4V18.3851L5.76282 17ZM6.45455 19L2 22.5V4C2 3.44772 2.44772 3 3 3H21C21.5523 3 22 3.44772 22 4V18C22 18.5523 21.5523 19 21 19H6.45455ZM11 14H13V16H11V14ZM8.56731 8.81346C8.88637 7.20919 10.302 6 12 6C13.933 6 15.5 7.567 15.5 9.5C15.5 11.433 13.933 13 12 13H11V11H12C12.8284 11 13.5 10.3284 13.5 9.5C13.5 8.67157 12.8284 8 12 8C11.2723 8 10.6656 8.51823 10.5288 9.20577L8.56731 8.81346Z"></path></svg> Why?</h4>
-           </div>
-           <div class="interruptionsBx">
-              <ul>
-                 <li>
-                    <div class="fraudiconbx">
-                       <img src="images/fraudicon1.png" alt="img">
-                    </div>   
-                 Prevent interruptions in your access</li>
-                 <li> <div class="fraudiconbx">
-                       <img src="images/fraudicon2.png" alt="img">
-                    </div>  
-                    Ensure transactions and rewards are processed correctly</li>
-                 <li> <div class="fraudiconbx">
-                       <img src="images/fraudicon3.png" alt="img">
-                    </div>  
-                    Maintain a fair and secure platform for all users</li>
-              </ul>
-           </div>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg></button>
-            
-             <div class="modal-body">
+            <div class="modal-content">
+            <div class="fraudicon">
+               <img src="images/fraudicon.png" alt="">
+            </div>
+            <div class="fraudHeading">
+               <h2>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z"></path></svg> Fraud Detection Tools Detected!
+               </h2>   
+               <h3>We have detected that you are using fraud detection or privacy tools that may interfere with the proper functioning of our website.</h3>
+            </div>
+            <div class="modal-body">
                <div class="blockersbx">
-                 <h4>We have detected the following security risks on your device:</h4>
-                 <ul>
-                    <li class="selectedbx">
-                       <!-- <span class="checkmarkSelect"></span> -->
-                       <div class="blockicons">
-                          <img src="/images/vpn.png" alt="img">
-                       </div>
-                       <div class="blockText">
-                          <h2>VPN Access:</h2>
-                          <h3>Disable your VPN and try again.</h3>
-                       </div>
-                    </li>
-     
-                    <li class="selectedbx">
-                       <div class="blockicons">
-                          <img src="/images/vpn.png" alt="img">
-                       </div>
-                       <div class="blockText">
-                          <h2>Rooted Device:</h2>
-                          <h3>Use a non-rooted device for access.</h3>
-                       </div>
-                    </li>
-     
-                    <li class="selectedbx">
-                       <div class="blockicons">
-                          <img src="/images/vpn.png" alt="img">
-                       </div>
-                       <div class="blockText">
-                          <h2>Termux Detected:</h2>
-                          <h3>Close Termux and access the site normally.</h3>
-                       </div>
-                    </li>
-     
-                    <li class="selectedbx">
-                       <div class="blockicons">
-                          <img src="/images/vpn.png" alt="img">
-                       </div>
-                       <div class="blockText">
-                          <h2>Emulator Detected:</h2>
-                          <h3>Use a real device for access.</h3>
-                       </div>
-                    </li>
-     
-                    <li class="selectedbx">
-                       <div class="blockicons">
-                          <img src="/images/vpn.png" alt="img">
-                       </div>
-                       <div class="blockText">
-                          <h2>Blocked Country:</h2>
-                          <h3>Our services are unavailable in your location.</h3>
-                       </div>
-                    </li>
-                 </ul>
+                  <h4>Please make sure that following tools are disabled:</h4>
+                  <ul>
+                     <li class="selectedbx">
+                        <div class="blockicons">
+                           <img src="/images/vpn.png" alt="img">
+                        </div>
+                        <div class="blockText">
+                           <h2>VPN Access:</h2>
+                           <h3>Disable your VPN and try again.</h3>
+                        </div>
+                     </li>
+                     <li class="selectedbx">
+                        <div class="blockicons">
+                           <img src="/images/rooted.png" alt="img">
+                        </div>
+                        <div class="blockText">
+                           <h2>Rooted Device:</h2>
+                           <h3>Use a non-rooted device for access.</h3>
+                        </div>
+                     </li>
+                     <li class="selectedbx">
+                        <div class="blockicons">
+                           <img src="/images/termux.png" alt="img">
+                        </div>
+                        <div class="blockText">
+                           <h2>Termux Detected:</h2>
+                           <h3>Close Termux and access the site normally.</h3>
+                        </div>
+                     </li>
+                     <li class="selectedbx">
+                        <div class="blockicons">
+                           <img src="/images/emul.png" alt="img">
+                        </div>
+                        <div class="blockText">
+                           <h2>Emulator Detected:</h2>
+                           <h3>Use a real device for access.</h3>
+                        </div>
+                     </li>
+                  </ul>
                </div>
                <div class="actionReq">
-                 <strong>Action Required:</strong>
-                 <p>Disable the above restriction(s) and refresh the page.</p>
+                  <strong>Action Required:</strong>
+                  <p>Disable the above restriction(s) and refresh the page.</p>
                </div>
              </div>
-     
-             <div class="thankcoop">
-             Thank you for your cooperation! 
-             </div>
-            
            </div>
          </div>
-       </div>
+      </div>
       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
       <!-- Modal -->

@@ -252,8 +252,13 @@ class DashboardController extends Controller
                                             $TrackingDetails->conversion_time = $value['created_at'];
                                             $TrackingDetails->payout = $value['payouts'];
                                             $TrackingDetails->revenue = $value['revenue'];
-                                            $TrackingDetails->postback_sent = 1;
-                                            $TrackingDetails->status = 1;
+                                            if($value['status']=='confirmed'){
+                                                $TrackingDetails->postback_sent = 1;
+                                                $TrackingDetails->status = 1;
+                                            }else{
+                                                $TrackingDetails->postback_sent = 0;
+                                                $TrackingDetails->status = 2;
+                                            }
 
                                             //creating signature
                                             $signatureUserId= (strpos($appDetail->postback, '{user_id}') !== false) ? $TrackingDetails->visitor_id : null;
@@ -283,14 +288,16 @@ class DashboardController extends Controller
                                             ];
                                             
                                             $postbackUrl = strtr($appDetail->postback, $replacements);      
-                                            $postbackUrl.= $postbackUrl.'&signature='.$TrackingDetails->signature;                              
-                                            $TrackingDetails->postback_url = $postbackUrl;
+                                            $postbackUrl.= $postbackUrl.'&signature='.$TrackingDetails->signature;      
+                                            if($value['status']=='confirmed'){                        
+                                                $TrackingDetails->postback_url = $postbackUrl;
 
-                                            //fire postback on webmaster
-                                            $postBackStatus = $this->sendPostback($postbackUrl);
-                                            $TrackingDetails->http_code = $postBackStatus['http_code'] ?? '500';
-                                            $TrackingDetails->error = $postBackStatus['error'] ?? NULL;
-                                            //end
+                                                //fire postback on webmaster
+                                                $postBackStatus = $this->sendPostback($postbackUrl);
+                                                $TrackingDetails->http_code = $postBackStatus['http_code'] ?? '500';
+                                                $TrackingDetails->error = $postBackStatus['error'] ?? NULL;
+                                                //end
+                                            }
                                             $TrackingDetails->save();
                                         }else{
                                             $errorTracking = new ConversionErrorTracker();
