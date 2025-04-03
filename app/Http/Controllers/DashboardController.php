@@ -19,7 +19,7 @@ class DashboardController extends Controller
     public function index(Request $request){
         $userCountry = $this->getUserCountry(request()->ip());
         $allBlockers = $this->GetBlockers($userCountry);
-        if($allBlockers['country']){
+        if($allBlockers['country'] || $allBlockers['emulator']){
             return redirect()->route('blocked');
         }
         $cookieValue = NULL;
@@ -135,7 +135,19 @@ class DashboardController extends Controller
             $enabledBlockers['termux']=  true;
         }
         if($emulatorBlocker){
-            $enabledBlockers['emulator']=  true;
+            $userAgent = request()->header('User-Agent');
+
+            // Common emulator keywords in User-Agent
+            $emulatorKeywords = [
+                'BlueStacks', 'Nox', 'Genymotion', 'Emulator', 'SDK', 
+                'GoogleSDK', 'X86', 'Xamarin', 'Andy', 'VirtualBox', 'VMware'
+            ];
+
+            foreach ($emulatorKeywords as $keyword) {
+                if (stripos($userAgent, $keyword) !== false) {
+                    $enabledBlockers['emulator']=  true;
+                }
+            }
         }
         if($countryBlocker){
             $enabledBlockers['country']=  true;

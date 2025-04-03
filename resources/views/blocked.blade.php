@@ -42,7 +42,7 @@
 <body>
     <div class="container">
         <h1>Oops! Content Not Available</h1>
-        <p>We’re sorry, but the content you are looking for is not available in your country.</p>
+        <p>We’re sorry, but the content you are looking for is not available.</p>
         <a href="/">Go Back to Homepage</a>
     </div>
 </body>
