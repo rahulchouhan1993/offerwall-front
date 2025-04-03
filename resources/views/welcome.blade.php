@@ -264,12 +264,16 @@
                            <li><a href="#">Support</a></li>
                         </ul>
                      </div>
-                     @if($settingDetails->linkedin!='' && $settingDetails->twitter!='')
+                     @if($settingDetails->linkedin!='' || $settingDetails->twitter!='')
                      <div class="footlink">
                         <h2>Social</h2>
                         <ul>
+                           @if($settingDetails->twitter!='')
                            <li><a target="_blank" href="{{ $settingDetails->twitter }}">Telegram</a></li>
+                           @endif
+                           @if($settingDetails->linkedin!='')
                            <li><a target="_blank" href="{{ $settingDetails->linkedin }}">LinkedIn</a></li>
+                           @endif
                         </ul>
                      </div>
                      @endif

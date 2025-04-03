@@ -7,20 +7,20 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
       <link rel="icon" type="image/x-icon" href="images/favicon.png">
-      <title>Offawall | Get Rewarded!</title>
+      <title>OfferwallXXX | Get Rewarded!</title>
       <meta name="description" content="Get Rewarded!">
-      <meta name="author" content="Offawall">
+      <meta name="author" content="OfferwallXXX">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
       <!-- Open Graph for Social Media -->
-      <meta property="og:title" content="Offawall">
+      <meta property="og:title" content="OfferwallXXX">
       <meta property="og:description" content="Get Rewarded!">
       <meta property="og:image" content="images/favicon.png">
       <meta property="og:url" content="{{ url()->current() }}">
       
       <!-- Twitter Card -->
       <meta name="twitter:card" content="summary_large_image">
-      <meta name="twitter:title" content="Offawall">
+      <meta name="twitter:title" content="OfferwallXXX">
       <meta name="twitter:description" content="Get Rewarded!">
       <meta name="twitter:image" content="/images/favicon.png">
       <link rel="stylesheet" href="css/style.css?dfgdg">
@@ -98,10 +98,11 @@
                   if(!empty($checkIfAlredyCliced)){
                      continue;
                   }
+                  $deviceTypeAllowed = empty($offer['strictly_os']) || array_key_exists($operatingSystem, $offer['strictly_os']['items']);
                   $deviceAllowed = empty($offer['targeting'][0]['device_type']) || in_array($deviceType, $offer['targeting'][0]['device_type']);
                   $countryAllowed = empty($offer['targeting'][0]['country']['allow']) || in_array($userCountry, $offer['targeting'][0]['country']['allow']);
                @endphp
-               @if($deviceAllowed && $countryAllowed)
+               @if($deviceAllowed && $countryAllowed && $deviceTypeAllowed)
                @if(empty($offer['logo']))
                     @php $offer['logo'] = $offerSettings->default_image; @endphp
                @endif
@@ -164,12 +165,14 @@
                   <div class="cntbxsize" style="width: calc(100% - 107px); display: flex; align-items: center; justify-content: space-between;">
                      <div style="width: calc(100% - 200px);">
                         <h2 style="margin: 0 0 10px; font-weight: 600; font-size: 20px; color: {{ $offerWallTemplate->offerText }};">{{ $offer['title'] }}</h2>
-                        {{-- <div style="display:flex;gap: 14px;align-items: center;">
+                        @if(!empty($offer['categories']))
+                        <div style="display:flex;gap: 14px;align-items: center;">
                            
-                           <div style="font-size: 18px;color:{{ $offerWallTemplate->offerText }}">
-                              {{ implode(',',$offer['categories']) }}
+                           <div style="font-size: 14px;color:{{ $offerWallTemplate->offerText }}">
+                              ( {{ implode(' ) ( ', $offer['categories']) }} )
                            </div>
-                        </div> --}}
+                        </div>
+                        @endif
                      </div>
                      
                      <div style="min-width: 150px;">

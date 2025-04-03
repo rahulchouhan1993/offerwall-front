@@ -38,6 +38,7 @@ class DashboardController extends Controller
             if(!empty($affiliateRecord) && !empty($appDetails)){
                 //User Agents
                 $agentDetails = new Agent();
+
                 if ($agentDetails->isMobile()) {
                     $deviceType = 'mobile';
                 } elseif ($agentDetails->isTablet()) {
@@ -45,7 +46,21 @@ class DashboardController extends Controller
                 } else {
                     $deviceType = 'desktop';
                 }
-                
+                $operatingSystem = $agentDetails->platform();
+                $osMapping = [
+                    'OS X'       => 'Mac OS X',  // Correcting macOS older naming
+                    'macOS'      => 'macOS',     // Modern macOS name
+                    'Windows'    => 'Windows',
+                    'Windows NT' => 'Windows',   // Some user agents report Windows NT
+                    'AndroidOS'  => 'Android',
+                    'Android'    => 'Android',
+                    'iOS'        => 'iOS',
+                    'iPadOS'     => 'iPadOS',    // iPads have separate OS
+                    'Linux'      => 'Linux',
+                    'Ubuntu'     => 'Ubuntu',
+                    'CrOS'       => 'Chrome OS'  // Chrome OS detection (optional)
+                ];
+                $operatingSystem = $osMapping[$operatingSystem] ?? $operatingSystem;
                 //End
                 $url = $offerSettings->affise_endpoint . "partner/offers?sort[epc]=desc&limit=50&countries[]=$userCountry";
                 $response = HTTP::withHeaders([
@@ -70,7 +85,31 @@ class DashboardController extends Controller
         }else{
             $isVpn = false;
         }
-        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry','isVpn'));
+        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry','isVpn','operatingSystem'));
+    }
+
+    public function detectDeviceType(){
+        $userAgent = request()->header('User-Agent');
+        // Custom OS mapping based on patterns
+        $osArray = [
+            'Windows' => 'Windows NT',
+            'MacOS'   => 'Macintosh',
+            'iOS'     => 'iPhone|iPad|iPod',
+            'Android' => 'Android',
+            'Linux'   => 'Linux',
+            'Ubuntu'  => 'Ubuntu',
+        ];
+
+        $detectedOS = 'Unknown OS';
+
+        // Matching user agent with OS patterns
+        foreach ($osArray as $os => $pattern) {
+            if (stripos($userAgent, $pattern) !== false) {
+                $detectedOS = $os;
+                break;
+            }
+        }
+        return $detectedOS;
     }
 
     public function GetBlockers($userCountry){
