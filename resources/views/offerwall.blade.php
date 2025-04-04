@@ -48,14 +48,14 @@
          .cntbxsize{width:100%!important;}
          */
          .cntbxsize{flex-direction:column;justify-content:flex-start !important;align-items:flex-start !important;}
-         .cntbxsize div{width:100% !important;}
+         .cntbxsize > div{width:100% !important;}
          .cntbx{font-size:11px !important;line-height:18px;}
          .menu li a{padding:0 10px !important;}
          .cntbxsize button{margin:10px 0 0; max-width: 120px!important;}
-         .cntbxsize h2 { margin: 0 0 2px!important; font-size: 12px!important; }
+         .cntbxsize h2 { margin: 0 0 2px!important; font-size: 16px!important; }
          .cntbxsize p { font-size: 11px!important; line-height: 13px!important; }
          .boxList { padding: 10px !important;         gap: 9px !important;}
-         .btnsm { margin-top:10px;        max-width: 150px;}
+         .btnsm {margin-top: 5px; max-width: 110px; font-size: 12px !important; padding: 5px 5px !important;}
          .cntmainbx { padding:20px!important;    padding-bottom: 80px!important;}
          }
          @media(max-width:480px){
@@ -161,15 +161,26 @@
                   <div style="width: 107px;">
                      <img src="{{ $offer['logo'] }}" alt="img" style="width: 100px; max-width: 100%; object-fit: cover;" />
                   </div>
-                 
+                  @php 
+                     $blockedCategories =[];
+                     if(!empty($offerSettings->blocked_categories)){
+                        $blockedCategories = explode(',',strtolower($offerSettings->blocked_categories));
+                     }
+                  @endphp
                   <div class="cntbxsize" style="width: calc(100% - 107px); display: flex; align-items: center; justify-content: space-between;">
                      <div style="width: calc(100% - 200px);">
                         <h2 style="margin: 0 0 10px; font-weight: 600; font-size: 20px; color: {{ $offerWallTemplate->offerText }};">{{ $offer['title'] }}</h2>
                         @if(!empty($offer['categories']))
                         <div style="display:flex;gap: 14px;align-items: center;">
                            
-                           <div style="font-size: 14px;color:{{ $offerWallTemplate->offerText }}">
-                              ( {{ implode(' ) ( ', $offer['categories']) }} )
+                           <div style="display:flex; flex-wrap:wrap; gap:4px; font-size: 14px;color:{{ $offerWallTemplate->offerText }}">
+                              @if(!empty($offer['categories']))
+                              @foreach ($offer['categories'] as $cat)
+                              @if(!in_array($cat,$blockedCategories))
+                              <div style="background:{{ $offerWallTemplate->offerBadgeBg }}; text-align:center; padding:4px 10px; border-radius:5px; font-size:14px;color:{{ $offerWallTemplate->offerBadgeText }};">{{ $cat }}</div> 
+                              @endif
+                              @endforeach
+                              @endif
                            </div>
                         </div>
                         @endif
