@@ -98,11 +98,23 @@
                   if(!empty($checkIfAlredyCliced)){
                      continue;
                   }
-                  $deviceTypeAllowed = empty($offer['strictly_os']) || array_key_exists($operatingSystem, $offer['strictly_os']['items']);
+                  //Checking OS
+                  $operatingSystemAllowed = empty($offer['strictly_os']) || array_key_exists($operatingSystem, $offer['strictly_os']['items']);
+
+                  //Checking Device
                   $deviceAllowed = empty($offer['targeting'][0]['device_type']) || in_array($deviceType, $offer['targeting'][0]['device_type']);
+
+                  //Checking Country
                   $countryAllowed = empty($offer['targeting'][0]['country']['allow']) || in_array($userCountry, $offer['targeting'][0]['country']['allow']);
+
+                  //Checking Caps
+                  if(isset($offer['caps'][0]['value'])){
+                     if($offer['caps'][0]['value']<=$offer['caps'][0]['current_value']){
+                        continue;
+                     }
+                  }
                @endphp
-               @if($deviceAllowed && $countryAllowed && $deviceTypeAllowed)
+               @if($deviceAllowed && $countryAllowed && $operatingSystemAllowed)
                @if(empty($offer['logo']))
                     @php $offer['logo'] = $offerSettings->default_image; @endphp
                @endif

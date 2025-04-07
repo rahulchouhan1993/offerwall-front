@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Models\Contact;
 use App\Models\Tracking;
 use App\Models\AppBlocker;
+use App\Models\TrafficTracking;
 use App\Models\ConversionErrorTracker;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
@@ -85,6 +86,7 @@ class DashboardController extends Controller
         }else{
             $isVpn = false;
         }
+
         return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry','isVpn','operatingSystem'));
     }
 
@@ -209,6 +211,40 @@ class DashboardController extends Controller
             $trackingData->user_id = $appDetails->affiliateId;
             $trackingData->affiliate_id = $userDetails->affiseId;
             $trackingData->save();
+
+            //Tracking Traffic
+            $agentDetails = new Agent();
+            if ($agentDetails->isMobile()) {
+                $deviceType = 'mobile';
+            } elseif ($agentDetails->isTablet()) {
+                $deviceType = 'tablet';
+            } else {
+                $deviceType = 'desktop';
+            }
+            $operatingSystem = $agentDetails->platform();
+            $osMapping = [
+                'OS X'       => 'Mac OS X',  // Correcting macOS older naming
+                'macOS'      => 'macOS',     // Modern macOS name
+                'Windows'    => 'Windows',
+                'Windows NT' => 'Windows',   // Some user agents report Windows NT
+                'AndroidOS'  => 'Android',
+                'Android'    => 'Android',
+                'iOS'        => 'iOS',
+                'iPadOS'     => 'iPadOS',    // iPads have separate OS
+                'Linux'      => 'Linux',
+                'Ubuntu'     => 'Ubuntu',
+                'CrOS'       => 'Chrome OS'  // Chrome OS detection (optional)
+            ];
+            $operatingSystem = $osMapping[$operatingSystem] ?? $operatingSystem;
+            $userCountry = $this->getUserCountry(request()->ip());
+            TrafficTracking::create([
+                'tracking_id' => $trackingData->id,
+                'device' => $deviceType,
+                'os' => $operatingSystem,
+                'country' => $userCountry,
+                'caps' => NULL,
+                'agent' => request()->header('User-Agent')
+            ]);
             $redirectingTo.= '&sub2=offerwall&sub3='.$appDetails->id.'&sub4='.$trackingData->id;
             return redirect()->away($redirectingTo);
         }
