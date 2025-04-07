@@ -194,6 +194,7 @@ class DashboardController extends Controller
     }
 
     public function track(Request $request){
+        $offerSettings = Setting::find(1);
         $redirectingTo = base64_decode(urldecode($request->query('ufto')));
         $fullQueryparam = parse_url($redirectingTo, PHP_URL_QUERY);
         parse_str($fullQueryparam, $paramValues);
@@ -245,7 +246,7 @@ class DashboardController extends Controller
                 'caps' => NULL,
                 'agent' => request()->header('User-Agent')
             ]);
-            $redirectingTo.= '&sub2=offerwall&sub3='.$appDetails->id.'&sub4='.$trackingData->id;
+            $redirectingTo.= '&sub2='.$offerSettings->offer_alias.'&sub3='.$appDetails->id.'&sub4='.$trackingData->id;
             return redirect()->away($redirectingTo);
         }
         die('Not a valid request');
@@ -268,7 +269,7 @@ class DashboardController extends Controller
                     $allClicks = $response->json();
                     if(!empty($allClicks['clicks'])){
                         foreach($allClicks['clicks'] as $clicKey => $clickValue){
-                            if($clickValue['sub2']!='offerwall'){
+                            if($clickValue['sub2']!=$advertiserDetails->offer_alias){
                                 continue;
                             }
                             if($clickValue['sub4']>0 && $clickValue['sub3']>0){
@@ -320,7 +321,7 @@ class DashboardController extends Controller
                 }
             
                 //updating the conversions of all added clicks
-                $url = $advertiserDetails->affise_endpoint . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2=offerwall&partner[]={$affiliateAffiseId}";
+                $url = $advertiserDetails->affise_endpoint . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2={$advertiserDetails->offer_alias}&partner[]={$affiliateAffiseId}";
                 $response = HTTP::withHeaders([
                     'API-Key' => $advertiserDetails->affise_api_key,
                 ])->get($url);
@@ -328,7 +329,7 @@ class DashboardController extends Controller
                     $allConversion = $response->json();
                     if(!empty($allConversion['conversions'])){
                         foreach($allConversion['conversions'] as $key => $value){
-                            if($value['sub2']=='offerwall'){
+                            if($value['sub2']==$advertiserDetails->offer_alias){
                                 if($value['sub3']>0 && $value['sub4']>0){
                                     $ifAlreadyAdded = Tracking::where('conversion_id',$value['conversion_id'])->first();
                                     if(empty($ifAlreadyAdded)){
