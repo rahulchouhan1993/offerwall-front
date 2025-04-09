@@ -43,6 +43,16 @@
          .close-button:hover{background-color:#fff; color:#000}
          .show-modal{opacity:1;visibility:visible;transform:scale(1.0);transition:visibility 0s linear 0s,opacity 0.25s 0s,transform 0.25s;}
          .trigger { cursor: pointer;}
+         .arrow-icon {width: 20px;height: 20px;fill: {{ $offerWallTemplate->offerButtonText }};animation:moveArrow 1s infinite alternate ease-in-out;}
+
+         @keyframes moveArrow {
+            0% {
+            transform: translateX(0);
+            }
+            100% {
+            transform: translateX(6px);
+            }
+         }
          /* responsive */
          @media(max-width:767px){/* .boxList{flex-direction:column;}
          .cntbxsize{width:100%!important;}
@@ -55,7 +65,7 @@
          .cntbxsize h2 { margin: 0 0 2px!important; font-size: 16px!important; }
          .cntbxsize p { font-size: 11px!important; line-height: 13px!important; }
          .boxList { padding: 10px !important;         gap: 9px !important;}
-         .btnsm {margin-top: 5px; max-width: 110px; font-size: 12px !important; padding: 5px 5px !important;}
+         .btnsm {margin-top: 5px; max-width: 120px; font-size: 12px !important; padding: 5px 5px !important;}
          .cntmainbx { padding:20px!important;    padding-bottom: 80px!important;}
          }
          @media(max-width:480px){
@@ -220,11 +230,13 @@
                            text-align: center;
                            justify-content: center;
                            border: none;
-                           text-decoration:none;
+                           text-decoration:none;    box-shadow:0 0 15px 0 rgba(0, 0, 0, 0.2);
                            color:{{ $offerWallTemplate->offerButtonText }};
                            "
                            > + 
-                            {{ $totalPayoutGiven }}
+                            {{ $totalPayoutGiven }} <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                           <path d="M12 4l1.41 1.41L7.83 11H20v2H7.83l5.58 5.59L12 20l-8-8 8-8z" transform="scale(-1,1) translate(-24, 0)"/>
+                        </svg>
                         </a>
                      </div>
                   </div>
@@ -260,7 +272,7 @@
                      <div style="width:100%" class="cntbx">
                         <p style="margin: 0; font-family: 'Inter'; font-size: 14px; color:{{ $offerWallTemplate->offerText }}" id="offer-description-pop">---</p>
                      </div>
-                     <a target="_blank" href="javascript;void(0);" style="display: inline-block; padding: 10px 30px;  background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px; color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
+                     <a target="_blank" href="javascript;void(0);" style="display: inline-block; padding: 10px 30px;  background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px;     box-shadow:0 0 15px 0 rgba(0, 0, 0, 0.2); color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
                   </div>
                </div>
             </div>
@@ -347,8 +359,8 @@
              var price = $(this).attr('price')
              var image = $(this).attr('image')
              var category = $(this).attr('category')
-
-             $('#offer-price-pop').html("+ "+price)
+            var icon = '<svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4l1.41 1.41L7.83 11H20v2H7.83l5.58 5.59L12 20l-8-8 8-8z" transform="scale(-1,1) translate(-24, 0)"/></svg>';
+             $('#offer-price-pop').html("+ "+price+" "+icon)
              $('#offer-price-pop').attr('href',redirectLink)
              $('#offer-title-pop').html(title)
              $('#offer-description-pop').html(description)
