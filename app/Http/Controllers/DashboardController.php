@@ -321,7 +321,8 @@ class DashboardController extends Controller
                 }
             
                 //updating the conversions of all added clicks
-                $url = $advertiserDetails->affise_endpoint . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2={$advertiserDetails->offer_alias}&partner[]={$affiliateAffiseId}";
+                //only confirmed and declined
+                $url = $advertiserDetails->affise_endpoint . "stats/conversions?limit=500&date_from={$previousDate}&date_to={$currentDate}&subid2={$advertiserDetails->offer_alias}&partner[]={$affiliateAffiseId}&status[]=1&status[]=3";
                 $response = HTTP::withHeaders([
                     'API-Key' => $advertiserDetails->affise_api_key,
                 ])->get($url);
@@ -334,6 +335,9 @@ class DashboardController extends Controller
                                     $ifAlreadyAdded = Tracking::where('conversion_id',$value['conversion_id'])->first();
                                     if(empty($ifAlreadyAdded)){
                                         $TrackingDetails = Tracking::find($value['sub4']);
+                                        if($TrackingDetails->conversion_id!==NULL){
+                                            $TrackingDetails = $this->insertNewWithSame($value['sub4']);
+                                        }
                                         if (!empty($TrackingDetails)) {
                                             $appDetail = App::find($TrackingDetails->app_id);
                                             $TrackingDetails->conversion_id = $value['conversion_id'];
@@ -344,8 +348,13 @@ class DashboardController extends Controller
                                                 $TrackingDetails->postback_sent = 1;
                                                 $TrackingDetails->status = 1;
                                             }else{
-                                                $TrackingDetails->postback_sent = 0;
-                                                $TrackingDetails->status = 2;
+                                                if(strtolower($value['comment'])=='fraud'){
+                                                    $TrackingDetails->postback_sent = 0;
+                                                    $TrackingDetails->reason = 'Fraud';
+                                                    $TrackingDetails->status = 2;
+                                                }else{
+                                                    continue;
+                                                }
                                             }
 
                                             //creating signature
@@ -410,6 +419,31 @@ class DashboardController extends Controller
         }
         
         die('done');
+    }
+
+    public function insertNewWithSame($id){
+        $original = Tracking::find($id); 
+
+        if ($original) {
+            // Convert to array and remove unwanted columns
+            $data = $original->toArray();
+            $data['goal'] = NULL;
+            $data['conversion_id'] = NULL;
+            $data['conversion_time'] = NULL;
+            $data['payout'] = NULL;
+            $data['revenue'] = NULL;
+            $data['postback_sent'] = 0;
+            $data['postback_url'] = NULL;
+            $data['http_code'] = NULL;
+            $data['error'] = NULL;
+            $data['signature'] = NULL;
+            $data['status'] = 0;
+            $data['reason'] = NULL;
+            unset($data['id'], $data['created_at'], $data['updated_at']);
+            // Create a new record with the remaining data
+            return Tracking::create($data);
+        }
+
     }
 
     public function sendPostback($url){
