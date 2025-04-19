@@ -332,6 +332,9 @@ class DashboardController extends Controller
                         foreach($allConversion['conversions'] as $key => $value){
                             if($value['sub2']==$advertiserDetails->offer_alias){
                                 if($value['sub3']>0 && $value['sub4']>0){
+                                    if($value['status']!='confirmed' && strtolower($value['comment'])!='fraud'){
+                                        continue;
+                                    }
                                     $ifAlreadyAdded = Tracking::where('conversion_id',$value['conversion_id'])->first();
                                     if(empty($ifAlreadyAdded)){
                                         $TrackingDetails = Tracking::find($value['sub4']);
@@ -344,6 +347,7 @@ class DashboardController extends Controller
                                             $TrackingDetails->conversion_time = $value['created_at'];
                                             $TrackingDetails->payout = $value['payouts'];
                                             $TrackingDetails->revenue = $value['revenue'];
+                                            $TrackingDetails->goal = $value['goal_value'];
                                             if($value['status']=='confirmed'){
                                                 $TrackingDetails->postback_sent = 1;
                                                 $TrackingDetails->status = 1;
