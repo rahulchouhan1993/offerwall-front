@@ -65,11 +65,13 @@
          .cntbxsize h2 { margin: 0 0 2px!important; font-size: 16px!important; }
          .cntbxsize p { font-size: 11px!important; line-height: 13px!important; }
          .boxList { padding: 10px !important;         gap: 9px !important;}
-         .btnsm {margin-top: 5px; max-width: 120px; font-size: 12px !important; padding: 5px 5px !important;}
+         .btnsm {margin-top: 5px; max-width: 160px; font-size: 12px !important; padding: 5px 5px !important;}
          .cntmainbx { padding:20px!important;    padding-bottom: 80px!important;}
+         .menuNav { gap:5px!important;}
          }
          @media(max-width:480px){
-         .modalbx {flex-wrap:wrap!important;}    
+         .modalbx {/*flex-wrap:wrap!important;*/    align-items: flex-start!important;    gap: 6px!important;}    
+         .logo img { max-width:100px!important;}
          }
       </style>
    </head>
@@ -80,11 +82,11 @@
       <!-- Static page -->
       <div style=" width: 100%;height: 100%;">
          <div style="display: flex ; flex-wrap: wrap; align-items: center; width: 100%; background: {{ $offerWallTemplate->headerBg }}; padding: 15px 15px; justify-content: space-between;">
-            <a href="#" style="margin: 0; font-size: 11px; font-weight: 600;">
+            <a href="#" class="logo" style="margin: 0; font-size: 11px; font-weight: 600;">
                <img style="max-width: 150px;" src="/images/logo.png" />
             </a>
             <div style="display: flex ; align-items: center; justify-content: space-between; padding: 3px 5px; background:{{ $offerWallTemplate->headerMenuBg }}">
-               <ul class="menuNav" style="display: flex; align-items: center; justify-content: start; gap: 15px; padding: 0; margin: 0; list-style: none;">
+               <ul class="menuNav" style="display: flex; align-items: center; justify-content: start; gap: 10px; padding: 0; margin: 0; list-style: none;">
                   <li>
                      <a class="active" href="{{ route('offerwall', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId']]) }}" 
                         style="display: block; padding: 14px 10px; font-size: 15px; border-bottom: 1px solid transparent; text-decoration: none;font-family: Open Sans; background: {{ $offerWallTemplate->headerActiveBg }}">
@@ -136,7 +138,13 @@
                     @php $offer['logo'] = $offerSettings->default_image; @endphp
                @endif
                @php 
-                    $totalPayoutGiven = $offer['payments'][0]['revenue']*$appDetails->currencyValue ?? 0*$appDetails->currencyValue;
+                  $totalGroupRevenue = 0;
+                  $rewardList = [];
+                  foreach($offer['payments'] as $revKey => $revValue){
+                     $totalGroupRevenue+=$revValue['revenue'];
+                     $rewardList[$revValue['goal']] = $revValue['revenue']*$appDetails->currencyValue ?? 0*$appDetails->currencyValue;
+                  }
+                  $totalPayoutGiven = $totalGroupRevenue*$appDetails->currencyValue ?? 0*$appDetails->currencyValue;
                @endphp
                @if($totalPayoutGiven>1)
                   @if ($appDetails->rounding==1)
@@ -176,15 +184,49 @@
                   $descriptionOffer = html_entity_decode($offer['description_lang']['en']);
                @endphp
                @if(empty($descriptionOffer))
-                    @php $descriptionOffer = $offerSettings->default_description; @endphp
+                  @php $descriptionOffer = $offerSettings->default_description; @endphp
                @endif
+               @php 
+               $rewardHtml = '';
+               if(count($rewardList)>1){
+                  $cntr = 1;
+                  foreach($rewardList as $rewKey => $revVal){
+                     $rewardHtml.= '<li style="display:flex;width: 100%;justify-content: flex-start;gap: 8px;align-items: center;justify-space-between;">
+                        <div style="display:flex;gap:8px;align-item-center;align-items: center;justify-content: flex-start;width: 60%;">';
+                     $checkIfComp = Tracking::where('visitor_id',$cookieValue)->where('offer_id',$offer['id'])->where('goal',$rewKey)->first();
+                     if(empty($checkIfComp)){
+                        $rewardHtml.='<button style="display: flex;align-items: center;justify-content: center;background: #f00000;color: #fff;width: 20px;height: 20px;border: none;padding: 0;font-size: 15px;min-width: 20px;min-height: 20px;">
+                           <svg style="width:13px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path>
+                           </svg>
+                        </button>';
+                     }else{
+                        $rewardHtml.='<button style="display: flex ; align-items: center; justify-content: center;background: green; color: #fff; width: 20px; height: 20px;  border: none; padding: 0; font-size: 15px; min-width: 20px; min-height: 20px;">
+                           <svg style="width:13px;  margin: -3px 0 0 -1px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z"></path>
+                           </svg>
+                        </button>';
+                     }
+                     $rewardHtml.= '<p style="margin: 0;font-family: Inter;font-size: 12px;color:'. $offerWallTemplate->offerText .'">Level '.$cntr.'</p>
+                     </div>
+                     <div style="margin: 0;font-family: Inter;font-size: 12px;color: '. $offerWallTemplate->offerText .';text-align: left;width: 40%;">
+                        Earn: +'. $revVal .' '. $appDetails->currencyNameP.'
+                     </div>
+                  </li>';
+                  $cntr++;
+                  }
+               }
+                  
+   
+               @endphp
                <div class="boxList trigger openPopupDetail" 
                 redirect-link="{{ $redirectlink }}" 
-                description="{{ $descriptionOffer }}" 
+                description='{{ $descriptionOffer }}'
                 title="{{ $offer['title'] }}"
                 image="{{ $offer['logo'] }}"
                 price="{{ $totalPayoutGiven }}"
                 category="{{ implode(',',$offer['categories']) }}"
+                rewardList='{{ $rewardHtml }}'
                 style="display: flex; align-items: center; gap: 20px; padding: 20px;box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.2); border-radius:15px; background: {{ $offerWallTemplate->offerBg }}; border: 1px solid {{ $offerWallTemplate->offerBg }}; width: 100%;">
                   
                   <div style="width: 107px;">
@@ -204,11 +246,11 @@
                            
                            <div style="display:flex; flex-wrap:wrap; gap:4px; font-size: 14px;color:{{ $offerWallTemplate->offerText }}">
                               @if(!empty($offer['categories']))
-                              @foreach ($offer['categories'] as $cat)
-                              @if(!in_array($cat,$blockedCategories))
-                              <div style="background:{{ $offerWallTemplate->offerBadgeBg }}; text-align:center; padding:4px 10px; border-radius:5px; font-size:14px;color:{{ $offerWallTemplate->offerBadgeText }};">{{ $cat }}</div> 
-                              @endif
-                              @endforeach
+                                 @foreach ($offer['categories'] as $cat)
+                                    @if(!in_array($cat,$blockedCategories))
+                                       <div style="background:{{ $offerWallTemplate->offerBadgeBg }}; text-align:center; padding:4px 10px; border-radius:5px; font-size:14px;color:{{ $offerWallTemplate->offerBadgeText }};">{{ $cat }}</div> 
+                                    @endif
+                                 @endforeach
                               @endif
                            </div>
                         </div>
@@ -230,9 +272,8 @@
                            text-align: center;
                            justify-content: center;
                            border: none;
-                           text-decoration:none;    box-shadow:0 0 15px 0 rgba(0, 0, 0, 0.2);
-                           color:{{ $offerWallTemplate->offerButtonText }};
-                           "
+                           text-decoration:none;box-shadow:0 0 15px 0 rgba(0, 0, 0, 0.2);
+                           color:{{ $offerWallTemplate->offerButtonText }};"
                            > + 
                             {{ $totalPayoutGiven }} <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                            <path d="M12 4l1.41 1.41L7.83 11H20v2H7.83l5.58 5.59L12 20l-8-8 8-8z" transform="scale(-1,1) translate(-24, 0)"/>
@@ -272,10 +313,18 @@
                      <div style="width:100%" class="cntbx">
                         <p style="margin: 0; font-family: 'Inter'; font-size: 14px; color:{{ $offerWallTemplate->offerText }}" id="offer-description-pop">---</p>
                      </div>
-                     <a target="_blank" href="javascript;void(0);" style="display: inline-block; padding: 10px 30px;  background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px;     box-shadow:0 0 15px 0 rgba(0, 0, 0, 0.2); color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
+                     <a target="_blank" href="javascript;void(0);" style="display: inline-flex;    align-items: center; padding: 10px 20px;  background:{{ $offerWallTemplate->offerButtonBg }}; font-family: 'Inter';  font-size: 14px;     box-shadow:0 0 15px 0 rgba(0, 0, 0, 0.2); color: {{ $offerWallTemplate->offerButtonText }}; text-decoration: none;" id="offer-price-pop">----</a>
                   </div>
                </div>
             </div>
+         <!-- New Code -->
+            <div style='margin:30px 0 0; padding:15px;border-radius:10px;background: #fff;'>
+               <h2 style='font-size: 16px; margin: 0 0 10px; color: {{ $offerWallTemplate->offerText }};'>Events</h2>
+               <ul id="rewardList-popup" style="display:flex;gap: 15px;flex-direction: column;max-height: 240px; overflow-y: auto;">
+                  
+               </ul>
+            </div>
+            <!-- end -->
          </div>
       </div>
 
@@ -352,21 +401,27 @@
             }
          })
          $(document).on('click', '.openPopupDetail', function () {
-             $('#offerDetailsPop').addClass('show-modal'); 
-             var redirectLink = $(this).attr('redirect-link')
-             var description = $(this).attr('description')
-             var title = $(this).attr('title')
-             var price = $(this).attr('price')
-             var image = $(this).attr('image')
-             var category = $(this).attr('category')
+            $('#offerDetailsPop').addClass('show-modal'); 
+            var redirectLink = $(this).attr('redirect-link')
+            var description = $(this).attr('description')
+            var title = $(this).attr('title')
+            var price = $(this).attr('price')
+            var image = $(this).attr('image')
+            var category = $(this).attr('category')
+            var rewardList = $(this).attr('rewardList')
             var icon = '<svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4l1.41 1.41L7.83 11H20v2H7.83l5.58 5.59L12 20l-8-8 8-8z" transform="scale(-1,1) translate(-24, 0)"/></svg>';
-             $('#offer-price-pop').html("+ "+price+" "+icon)
-             $('#offer-price-pop').attr('href',redirectLink)
-             $('#offer-title-pop').html(title)
-             $('#offer-description-pop').html(description)
-             $('#offer-category-pop').html(category)
-             
-             $('#offer-image-pop').attr('src',image)
+            $('#offer-price-pop').html("+ "+price+" "+icon)
+            $('#offer-price-pop').attr('href',redirectLink)
+            $('#offer-title-pop').html(title)
+            $('#offer-description-pop').html(description)
+            $('#offer-category-pop').html(category)
+            $('#rewardList-popup').html(rewardList)
+            if(rewardList==''){
+               $('#rewardList-popup').parent().hide();
+            }else{
+               $('#rewardList-popup').parent().show();
+            }
+            $('#offer-image-pop').attr('src',image)
              
          });
          $('.close-button').on('click', function () {
