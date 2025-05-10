@@ -141,9 +141,21 @@
                   $totalGroupRevenue = 0;
                   $rewardList = [];
                   foreach($offer['payments'] as $revKey => $revValue){
-                     $totalGroupRevenue+=$revValue['revenue'];
-                     $rewardList[$revValue['goal']] = $revValue['revenue']*$appDetails->currencyValue ?? 0*$appDetails->currencyValue;
+                     $revenuOfKey = $revValue['revenue'] ?? 0;
+                     if($revValue['country_exclude']==1){
+                        if(!in_array($userCountry,$revValue['countries'])){
+                           $totalGroupRevenue+=$revenuOfKey;
+                           $rewardList[$revValue['goal']] = $revenuOfKey*$appDetails->currencyValue ?? 0*$appDetails->currencyValue;
+                        }
+                     }else{
+                        if(in_array($userCountry,$revValue['countries']) || empty($revValue['countries'])){
+                           $totalGroupRevenue+=$revenuOfKey;
+                           $rewardList[$revValue['goal']] = $revenuOfKey*$appDetails->currencyValue ?? 0*$appDetails->currencyValue;
+                        }
+                     }
+                     
                   }
+                  if($totalGroupRevenue<=0){ continue; }
                   $totalPayoutGiven = $totalGroupRevenue*$appDetails->currencyValue ?? 0*$appDetails->currencyValue;
                @endphp
                @if($totalPayoutGiven>1)
@@ -207,7 +219,7 @@
                            </svg>
                         </button>';
                      }
-                     $rewardHtml.= '<p style="margin: 0;font-family: Inter;font-size: 12px;color:'. $offerWallTemplate->offerText .'">Level '.$cntr.'</p>
+                     $rewardHtml.= '<p style="margin: 0;font-family: Inter;font-size: 12px;color:'. $offerWallTemplate->offerText .'">Reward Event '.$cntr.'</p>
                      </div>
                      <div style="margin: 0;font-family: Inter;font-size: 12px;color: '. $offerWallTemplate->offerText .';text-align: left;width: 40%;">
                         Earn: +'. $revVal .' '. $appDetails->currencyNameP.'

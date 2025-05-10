@@ -571,23 +571,15 @@ class DashboardController extends Controller
                     if ($response->successful()) {
                         $offerDetails = $response->json();
                         if(!$this->isValidImageUrl($offerDetails['offer']['logo'])){
-                            $offerDetails['offer']['logo'] = $offerSettings->default_image;
-                        }
-                        if(!empty($offerDetails['offer']['full_categories'])){
-                            foreach($offerDetails['offer']['full_categories'] as $categ){
-                                $offerDetails['offer']['offerCategories'][] = $categ['title'];
-                            }
+                            $allOffers['offers'][$tracking->id]['logo'] = $offerSettings->default_image;
                         }else{
-                            $offerDetails['offer']['offerCategories'] = [];
+                            $allOffers['offers'][$tracking->id]['logo'] = $offerDetails['offer']['logo'];
                         }
-                        $offerDetails['offer']['click_time'] = Carbon::parse($tracking->created_at)->format('d M Y');
-                        $offerDetails['offer']['reward_status'] = ($tracking->postback_sent) ? 'Completed' : 'Pending';
-                        $allOffers['offers'][$tracking->id] = $offerDetails['offer'];
+                        $allOffers['offers'][$tracking->id]['description_lang'] = $offerDetails['offer']['description_lang']['en'];
                     }
                 }
             }
         }
-        
         $appDetails = App::where('appId',$request->wallId)->where('status',1)->first();
         $offerWallTemplate = Template::where('app_id',$appDetails->id)->first();
         if(empty($offerWallTemplate)){

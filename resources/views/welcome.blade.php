@@ -3,24 +3,24 @@
    <head>
       <meta charset="UTF-8">
       <meta name="Googlebot-News" content="noindex, nofollow">
-      <meta name="googlebot" content="noindex, nofollow">
+      <meta name="googlebot" content="index, follow">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta name="csrf-token" content="{{ csrf_token() }}">
-      <title>OfferwallXXX</title>
-      <meta name="description" content="Unlock premium engagement and revenue with our innovative offerwall technology. Whether you serve specialized platforms, mature audiences, or unique verticals, we elevate your monetization potential.">
+      <title>Offawall – High-EPC Offerwall for GPT Sites & Apps</title>
+      <meta name="description" content="Tired of low-paying offerwalls? Offawall delivers top EPCs, global offers, fast payouts & easy setup. Start making real money today.">
       <meta name="author" content="OfferwallXXX">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
       <!-- Open Graph for Social Media -->
-      <meta property="og:title" content="OfferwallXXX">
-      <meta property="og:description" content="Unlock premium engagement and revenue with our innovative offerwall technology. Whether you serve specialized platforms, mature audiences, or unique verticals, we elevate your monetization potential.">
+      <meta property="og:title" content="Offawall – High-EPC Offerwall for GPT Sites & Apps">
+      <meta property="og:description" content="Tired of low-paying offerwalls? Offawall delivers top EPCs, global offers, fast payouts & easy setup. Start making real money today.">
       <meta property="og:image" content="/images/favicon.png">
       <meta property="og:url" content="{{ url()->current() }}">
       
       <!-- Twitter Card -->
       <meta name="twitter:card" content="summary_large_image">
-      <meta name="twitter:title" content="OfferwallXXX">
-      <meta name="twitter:description" content="Unlock premium engagement and revenue with our innovative offerwall technology. Whether you serve specialized platforms, mature audiences, or unique verticals, we elevate your monetization potential.">
+      <meta name="twitter:title" content="Offawall – High-EPC Offerwall for GPT Sites & Apps">
+      <meta name="twitter:description" content="Tired of low-paying offerwalls? Offawall delivers top EPCs, global offers, fast payouts & easy setup. Start making real money today.">
       <meta name="twitter:image" content="/images/favicon.png">
       <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/>
       <link rel="stylesheet" href="css/bootstrap.min.css?dfgdg">
