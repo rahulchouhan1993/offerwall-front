@@ -39,7 +39,7 @@ h1,h2,h3,h4,ul,p{padding:0;margin:0}
 section{scroll-margin-top:280px;/* अपने navbar की height के हिसाब से एडजस्ट करें */
 }
 /* use css */
-nav.navbar.navbar-expand-lg{background:#151515 !important;position:fixed;top:0;left:0;right:0;margin:auto;border-bottom:1px solid #332b32;padding:20px 0 20px;}
+nav.navbar.navbar-expand-lg{background:#151515 !important;position:fixed;top:0;left:0;right:0;margin:auto;border-bottom:1px solid #332b32;padding:20px 0 20px;z-index: 9;}
 .contact .btn.btn-primary{border-radius:16px;}
 nav.navbar ul.navbar-nav li.nav-item .nav-link{font-size:18px;font-weight:500;color:#796B78;text-transform:uppercase;}
 nav.navbar ul.navbar-nav li.nav-item{margin-right:30px;}
