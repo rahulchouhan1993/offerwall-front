@@ -25,6 +25,9 @@ class DashboardController extends Controller
         }
         $cookieValue = NULL;
         $requestedParams = $request->all();
+        if(!isset($requestedParams['userId'])){
+            $requestedParams['userId'] = 0;
+        }
         if(!empty($request->apiKey) && !empty($request->wallId)){
             $affiliateRecord = User::where('api_key',$request->apiKey)->where('status',1)->first();
             $appDetails = App::where('appId',$request->wallId)->where('status',1)->first();
@@ -194,6 +197,9 @@ class DashboardController extends Controller
     }
 
     public function track(Request $request){
+        if(!isset($_COOKIE['userCookie'])){
+            $this->checkAndSetCookie();
+        }
         $offerSettings = Setting::find(1);
         $redirectingTo = base64_decode(urldecode($request->query('ufto')));
         $fullQueryparam = parse_url($redirectingTo, PHP_URL_QUERY);
@@ -205,6 +211,7 @@ class DashboardController extends Controller
             $userDetails = User::find($appDetails->affiliateId);
             $trackingData = new Tracking();
             $trackingData->visitor_id = $_COOKIE['userCookie'];
+            $trackingData->webmaster_id = $request->webmaster_id;
             $trackingData->app_id = $appDetails->id;
             $trackingData->offer_id = $affiseOfferId;
             $trackingData->offer_name = $request->offer_name;
@@ -246,13 +253,14 @@ class DashboardController extends Controller
                 'caps' => NULL,
                 'agent' => request()->header('User-Agent')
             ]);
-            $redirectingTo.= '&sub2='.$offerSettings->offer_alias.'&sub3='.$appDetails->id.'&sub4='.$trackingData->id;
+            $redirectingTo.= '&sub1='.$trackingData->id.'&sub2='.$offerSettings->offer_alias.'&sub3='.$appDetails->id;
             return redirect()->away($redirectingTo);
         }
         die('Not a valid request');
     }
 
     public function updateConversion(){
+        set_time_limit(-1); 
         $advertiserDetails = Setting::find(1);
         $allActiveAffiliates = User::where('status',1)->where('role','affiliate')->get();
         $previousDate = Carbon::yesterday()->toDateString();
@@ -328,6 +336,7 @@ class DashboardController extends Controller
                 ])->get($url);
                 if ($response->successful()) {
                     $allConversion = $response->json();
+
                     if(!empty($allConversion['conversions'])){
                         foreach($allConversion['conversions'] as $key => $value){
                             if($value['sub2']==$advertiserDetails->offer_alias){
@@ -362,7 +371,7 @@ class DashboardController extends Controller
                                             }
 
                                             //creating signature
-                                            $signatureUserId= (strpos($appDetail->postback, '{user_id}') !== false) ? $TrackingDetails->visitor_id : null;
+                                            $signatureUserId= (strpos($appDetail->postback, '{user_id}') !== false) ? $TrackingDetails->webmaster_id : null;
                                             $signatureClickId = (strpos($appDetail->postback, '{click_id}') !== false) ? $TrackingDetails->click_id : null;
                                             $signatureTrackingId = (strpos($appDetail->postback, '{tracking_id}') !== false) ? $TrackingDetails->id : null;
                                             $signatureAppId = (strpos($appDetail->postback, '{app_id}') !== false) ? $TrackingDetails->app_id : null;
@@ -371,7 +380,7 @@ class DashboardController extends Controller
 
                                             //defining postback url with parameters
                                             $replacements = [
-                                                '{user_id}' => $TrackingDetails->visitor_id,
+                                                '{user_id}' => $TrackingDetails->webmaster_id,
                                                 '{reward}' => $TrackingDetails->reward,
                                                 '{status}' => 'Approved',
                                                 '{payout}' => $value['payouts'],
@@ -389,7 +398,7 @@ class DashboardController extends Controller
                                             ];
                                             
                                             $postbackUrl = strtr($appDetail->postback, $replacements);      
-                                            $postbackUrl.= $postbackUrl.'&signature='.$TrackingDetails->signature;      
+                                            $postbackUrl = $postbackUrl.'&signature='.$TrackingDetails->signature;      
                                             if($value['status']=='confirmed'){                        
                                                 $TrackingDetails->postback_url = $postbackUrl;
 

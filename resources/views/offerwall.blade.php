@@ -88,13 +88,13 @@
             <div style="display: flex ; align-items: center; justify-content: space-between; padding: 3px 5px; background:{{ $offerWallTemplate->headerMenuBg }}">
                <ul class="menuNav" style="display: flex; align-items: center; justify-content: start; gap: 10px; padding: 0; margin: 0; list-style: none;">
                   <li>
-                     <a class="active" href="{{ route('offerwall', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId']]) }}" 
+                     <a class="active" href="{{ route('offerwall', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId']]) }}" 
                         style="display: block; padding: 14px 10px; font-size: 15px; border-bottom: 1px solid transparent; text-decoration: none;font-family: Open Sans; background: {{ $offerWallTemplate->headerActiveBg }}">
                      Offers
                      </a>
                   </li>
                   <li>
-                     <a href="{{ route('completedOffers', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId']]) }}" 
+                     <a href="{{ route('completedOffers', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId']]) }}" 
                         style="display: block; padding: 14px 10px; font-size: 15px; color: {{ $offerWallTemplate->headerNonActiveTextColor }}; border-bottom: 1px solid transparent; text-decoration: none;font-family: Open Sans;">
                      My Rewards
                      </a>
@@ -192,7 +192,7 @@
                @endif
                @php 
                   $ufto = base64_encode($offer['link']);
-                  $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.$appDetails->appId.'&vstr='.base64_encode($cookieValue).'&offer_name='.$offer['title'].'&reward='.$totalPayoutGiven;
+                  $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.$appDetails->appId.'&vstr='.base64_encode($cookieValue).'&offer_name='.$offer['title'].'&reward='.$totalPayoutGiven.'&webmaster_id='.$requestedParams['userId'];
                   $descriptionOffer = html_entity_decode($offer['description_lang']['en']);
                @endphp
                @if(empty($descriptionOffer))
@@ -311,7 +311,7 @@
             <span class="close-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5859 12L2.79297 4.20706L4.20718 2.79285L12.0001 10.5857L19.793 2.79285L21.2072 4.20706L13.4143 12L21.2072 19.7928L19.793 21.2071L12.0001 13.4142L4.20718 21.2071L2.79297 19.7928L10.5859 12Z"></path></svg></span>
             <div class="modalbx" style="display: flex ; align-items: center; justify-content: flex-start; gap: 20px;">
                <div style="display: flex ; align-items: center; width: 33%;">
-                  <img id="offer-image-pop" src="{{ $offer['logo'] }}" alt="img" style="width: 100%; max-width: 100%; object-fit: cover;" />
+                  <img id="offer-image-pop" src="" alt="img" style="width: 100%; max-width: 100%; object-fit: cover;" />
                </div>
                <div style="display: flex ; align-items: center; justify-content: space-between; width: 100%;">
                   <div style="">

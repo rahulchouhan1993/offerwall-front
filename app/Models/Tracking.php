@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Tracking extends Model
 {
     protected $fillable = [
+        'webmaster_id',
         'visitor_id',
         'app_id',
         'offer_id',
