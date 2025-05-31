@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\App;
 use App\Models\Template;
+use App\Models\FeaturedOffer;
 use App\Models\Setting;
 use App\Models\Contact;
 use App\Models\Tracking;
@@ -27,6 +28,15 @@ class DashboardController extends Controller
         $requestedParams = $request->all();
         if(!isset($requestedParams['userId'])){
             $requestedParams['userId'] = 0;
+        }
+        if(!isset($requestedParams['sub4'])){
+            $requestedParams['sub4'] = NULL;
+        }
+        if(!isset($requestedParams['sub5'])){
+            $requestedParams['sub5'] = NULL;
+        }
+        if(!isset($requestedParams['sub6'])){
+            $requestedParams['sub6'] = NULL;
         }
         if(!empty($request->apiKey) && !empty($request->wallId)){
             $affiliateRecord = User::where('api_key',$request->apiKey)->where('status',1)->first();
@@ -66,12 +76,35 @@ class DashboardController extends Controller
                 ];
                 $operatingSystem = $osMapping[$operatingSystem] ?? $operatingSystem;
                 //End
+
+                //Get Featured Offer List
+                $featuredOffer = FeaturedOffer::whereRaw("FIND_IN_SET(?, affiliates)", [$affiliateRecord->id])
+                ->whereRaw("FIND_IN_SET(?, countries)", [$userCountry])
+                ->whereRaw("FIND_IN_SET(?, devices)", [$deviceType])
+                ->orderBy('id', 'ASC')
+                ->first();
+                if(!emptY($featuredOffer)){
+                    $url_feat = $offerSettings->affise_endpoint . "offer/{$featuredOffer->offer_id}";
+                    $response_feat = HTTP::withHeaders([
+                        'API-Key' => $affiliateRecord->affise_api_key,
+                    ])->get($url_feat);
+                    if ($response_feat->successful()) {
+                        $featuredOfferDetails = $response_feat->json();
+                    }
+                }
+
                 $url = $offerSettings->affise_endpoint . "partner/offers?sort[epc]=desc&limit=50&countries[]=$userCountry";
                 $response = HTTP::withHeaders([
                     'API-Key' => $affiliateRecord->affise_api_key,
                 ])->get($url);
                 if ($response->successful()) {
                     $allOffers = $response->json();
+                    if(!empty($featuredOfferDetails)){
+                        $featuredOfferDetails['offer']['isfeat'] = 1;
+                        $mergedOffers = array_merge([$featuredOfferDetails['offer']], $allOffers['offers']);
+                        $allOffers['offers'] = $mergedOffers;
+                    }
+
                     //add cookie
                     $cookieValue = $this->checkAndSetCookie();
                 }else{
@@ -90,7 +123,7 @@ class DashboardController extends Controller
             $isVpn = false;
         }
 
-        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry','isVpn','operatingSystem'));
+        return view('offerwall',compact('allOffers','offerWallTemplate','offerSettings','appDetails','deviceType','cookieValue','requestedParams','userCountry','isVpn','operatingSystem','featuredOffer'));
     }
 
     public function detectDeviceType(){
@@ -212,6 +245,9 @@ class DashboardController extends Controller
             $trackingData = new Tracking();
             $trackingData->visitor_id = $_COOKIE['userCookie'];
             $trackingData->webmaster_id = $request->webmaster_id;
+            $trackingData->sub4 = $request->sub4;
+            $trackingData->sub5 = $request->sub5;
+            $trackingData->sub6 = $request->sub6;
             $trackingData->app_id = $appDetails->id;
             $trackingData->offer_id = $affiseOfferId;
             $trackingData->offer_name = $request->offer_name;
@@ -253,7 +289,18 @@ class DashboardController extends Controller
                 'caps' => NULL,
                 'agent' => request()->header('User-Agent')
             ]);
-            $redirectingTo.= '&sub1='.$trackingData->id.'&sub2='.$offerSettings->offer_alias.'&sub3='.$appDetails->id;
+            $redirectingTo.= '&sub1='.base64_encode($trackingData->id).'&sub2='.$offerSettings->offer_alias.'&sub3='.base64_encode($appDetails->id); 
+            
+            if (!empty($trackingData->sub4)) {
+                $redirectingTo .= '&sub4=' .$trackingData->sub4;
+            }
+            if (!empty($trackingData->sub5)) {
+                $redirectingTo .= '&sub5=' .$trackingData->sub5;
+            }
+            if (!empty($trackingData->sub6)) {
+                $redirectingTo .= '&sub6=' .$trackingData->sub6;
+            }
+            
             return redirect()->away($redirectingTo);
         }
         die('Not a valid request');
@@ -280,10 +327,20 @@ class DashboardController extends Controller
                             if($clickValue['sub2']!=$advertiserDetails->offer_alias){
                                 continue;
                             }
-                            if($clickValue['sub4']>0 && $clickValue['sub3']>0){
+                            if (intval($clickValue['sub1']) > 0) {}
+                            else{
+                                $clickValue['sub1'] = base64_decode($clickValue['sub1']);
+                            }
+
+                            if (intval($clickValue['sub3']) > 0) {}
+                            else{
+                                $clickValue['sub3'] = base64_decode($clickValue['sub3']);
+                            }
+                            
+                            if($clickValue['sub1']>0 && $clickValue['sub3']>0){
                                 $ifAlreadyAdded = Tracking::where('click_id',$clickValue['click_id'])->first();
                                 if(empty($ifAlreadyAdded)){
-                                    $validateTracking = Tracking::find($clickValue['sub4']);
+                                    $validateTracking = Tracking::find($clickValue['sub1']);
                                     //Check device Type
                                     if (preg_match('/mobile/i', $clickValue['ua'])) {
                                         $deviceType = 'Mobile';
@@ -340,15 +397,27 @@ class DashboardController extends Controller
                     if(!empty($allConversion['conversions'])){
                         foreach($allConversion['conversions'] as $key => $value){
                             if($value['sub2']==$advertiserDetails->offer_alias){
-                                if($value['sub3']>0 && $value['sub4']>0){
+                                if (intval($value['sub1']) > 0) {}
+                                else{
+                                    $value['sub1'] = base64_decode($value['sub1']);
+                                }
+
+                                if (intval($value['sub3']) > 0) {}
+                                else{
+                                    $value['sub3'] = base64_decode($value['sub3']);
+                                }
+                                if($value['sub3']>0 && $value['sub1']>0){
                                     if($value['status']!='confirmed' && strtolower($value['comment'])!='fraud'){
                                         continue;
                                     }
                                     $ifAlreadyAdded = Tracking::where('conversion_id',$value['conversion_id'])->first();
                                     if(empty($ifAlreadyAdded)){
-                                        $TrackingDetails = Tracking::find($value['sub4']);
+                                        $TrackingDetails = Tracking::find($value['sub1']);
+                                        if(empty($TrackingDetails)){
+                                            continue;
+                                        }
                                         if($TrackingDetails->conversion_id!==NULL){
-                                            $TrackingDetails = $this->insertNewWithSame($value['sub4']);
+                                            $TrackingDetails = $this->insertNewWithSame($value['sub1']);
                                         }
                                         if (!empty($TrackingDetails)) {
                                             $appDetail = App::find($TrackingDetails->app_id);
@@ -399,6 +468,15 @@ class DashboardController extends Controller
                                             
                                             $postbackUrl = strtr($appDetail->postback, $replacements);      
                                             $postbackUrl = $postbackUrl.'&signature='.$TrackingDetails->signature;      
+                                            if(!empty($TrackingDetails->sub4)){
+                                                $postbackUrl.='&sub4='.$TrackingDetails->sub4;
+                                            }
+                                            if(!empty($TrackingDetails->sub5)){
+                                                $postbackUrl.='&sub5='.$TrackingDetails->sub5;
+                                            }
+                                            if(!empty($TrackingDetails->sub6)){
+                                                $postbackUrl.='&sub6='.$TrackingDetails->sub6;
+                                            }
                                             if($value['status']=='confirmed'){                        
                                                 $TrackingDetails->postback_url = $postbackUrl;
 
@@ -433,6 +511,34 @@ class DashboardController extends Controller
         
         die('done');
     }
+
+    function isBase64Encoded($string) {
+        // Must be a string and not empty
+        if (!is_string($string) || $string === '') {
+            return false;
+        }
+
+        // Check if length is a multiple of 4
+        if (strlen($string) % 4 !== 0) {
+            return false;
+        }
+
+        // Check if it contains only valid base64 characters
+        if (!preg_match('/^[A-Za-z0-9+\/]*={0,2}$/', $string)) {
+            return false;
+        }
+
+        // Decode in strict mode
+        $decoded = base64_decode($string, true);
+        if ($decoded === false) {
+            return false;
+        }
+
+        // Check if encoding the decoded result gives original input (with padding considered)
+        // Padding may differ (extra =), so normalize both sides before comparing
+        return base64_encode($decoded) === $string;
+    }
+
 
     public function insertNewWithSame($id){
         $original = Tracking::find($id); 

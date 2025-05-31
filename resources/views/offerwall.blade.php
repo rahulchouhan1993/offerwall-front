@@ -53,6 +53,28 @@
             transform: translateX(6px);
             }
          }
+
+        @keyframes glowing-border {
+         0%, 100% {
+            border-color: transparent;
+            box-shadow: none;
+         }
+         50% {
+            border-color: {{ $offerWallTemplate->offerButtonBg }};
+            box-shadow: 0 0 10px 2px {{ $offerWallTemplate->offerButtonBg }},
+                        0 0 20px 4px {{ $offerWallTemplate->offerButtonBg }};
+         }
+      }
+
+      .is-special-offer {
+         padding: 20px;
+         border: 2px solid transparent;
+         border-radius: 10px;
+         animation: glowing-border 2s infinite ease-in-out;
+         transition: all 0.3s ease-in-out;
+      }
+
+         
          /* responsive */
          @media(max-width:767px){/* .boxList{flex-direction:column;}
          .cntbxsize{width:100%!important;}
@@ -77,6 +99,7 @@
    </head>
    @php
       use App\Models\Tracking;
+      $skipDuplicate = [];
    @endphp
    <body>
       <!-- Static page -->
@@ -88,13 +111,13 @@
             <div style="display: flex ; align-items: center; justify-content: space-between; padding: 3px 5px; background:{{ $offerWallTemplate->headerMenuBg }}">
                <ul class="menuNav" style="display: flex; align-items: center; justify-content: start; gap: 10px; padding: 0; margin: 0; list-style: none;">
                   <li>
-                     <a class="active" href="{{ route('offerwall', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId']]) }}" 
+                     <a class="active" href="{{ route('offerwall', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId'], 'sub4' => $requestedParams['sub4'], 'sub5' => $requestedParams['sub5'], 'sub6' => $requestedParams['sub6']]) }}" 
                         style="display: block; padding: 14px 10px; font-size: 15px; border-bottom: 1px solid transparent; text-decoration: none;font-family: Open Sans; background: {{ $offerWallTemplate->headerActiveBg }}">
                      Offers
                      </a>
                   </li>
                   <li>
-                     <a href="{{ route('completedOffers', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId']]) }}" 
+                     <a href="{{ route('completedOffers', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId'], 'sub4' => $requestedParams['sub4'], 'sub5' => $requestedParams['sub5'], 'sub6' => $requestedParams['sub6']]) }}" 
                         style="display: block; padding: 14px 10px; font-size: 15px; color: {{ $offerWallTemplate->headerNonActiveTextColor }}; border-bottom: 1px solid transparent; text-decoration: none;font-family: Open Sans;">
                      My Rewards
                      </a>
@@ -105,6 +128,7 @@
          <div style="display: flex ; height: 100%;  padding-bottom: 60px; align-items: start; width: 100%; flex-direction: column; font-family: Open Sans; background-color:{{ $offerWallTemplate->bodyBg }}">
             <div class="cntmainbx" style="width:100%; display: flex; flex-direction: column; align-items: flex-start; gap: 15px; padding: 60px; padding-bottom: 80px; background: {{ $offerWallTemplate->bodyBg }};">
                @foreach ($allOffers['offers'] as $offer)
+               @php if(in_array($offer['id'],$skipDuplicate)) { continue;}else{ $skipDuplicate[] = $offer['id']; } @endphp
                @php
                   $checkIfAlredyCliced = Tracking::where('offer_id',$offer['id'])->where('visitor_id',$cookieValue)->whereNotNull('conversion_id')->first();
                   if(!empty($checkIfAlredyCliced)){
@@ -135,7 +159,7 @@
                @endphp
                @if($deviceAllowed && $countryAllowed && $operatingSystemAllowed)
                @if(empty($offer['logo']))
-                    @php $offer['logo'] = $offerSettings->default_image; @endphp
+                  @php $offer['logo'] = $offerSettings->default_image; @endphp
                @endif
                @php 
                   $totalGroupRevenue = 0;
@@ -192,14 +216,14 @@
                @endif
                @php 
                   $ufto = base64_encode($offer['link']);
-                  $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.$appDetails->appId.'&vstr='.base64_encode($cookieValue).'&offer_name='.$offer['title'].'&reward='.$totalPayoutGiven.'&webmaster_id='.$requestedParams['userId'];
+                  $redirectlink = env('APP_URL')."/track?ufto=" . urlencode($ufto).'&wall='.$appDetails->appId.'&vstr='.base64_encode($cookieValue).'&offer_name='.$offer['title'].'&reward='.$totalPayoutGiven.'&webmaster_id='.$requestedParams['userId'].'&sub4='.$requestedParams['sub4'].'&sub5='.$requestedParams['sub5'].'&sub6='.$requestedParams['sub6'];
                   $descriptionOffer = html_entity_decode($offer['description_lang']['en']);
                @endphp
                @if(empty($descriptionOffer))
                   @php $descriptionOffer = $offerSettings->default_description; @endphp
                @endif
                @php 
-               $rewardHtml = '';
+               $rewardHtml = ''; 
                if(count($rewardList)>1){
                   $cntr = 1;
                   foreach($rewardList as $rewKey => $revVal){
@@ -229,9 +253,12 @@
                   }
                }
                   
-   
+               $specialOffer = '';
+               if(isset($offer['isfeat']) && $offer['isfeat']==1){ 
+                  $specialOffer = 'is-special-offer';
+               }
                @endphp
-               <div class="boxList trigger openPopupDetail" 
+               <div class="boxList trigger openPopupDetail {{ $specialOffer }}" 
                 redirect-link="{{ $redirectlink }}" 
                 description='{{ $descriptionOffer }}'
                 title="{{ $offer['title'] }}"

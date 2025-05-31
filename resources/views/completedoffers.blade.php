@@ -80,10 +80,10 @@
             <div style="display: flex ; align-items: center; justify-content: space-between; padding: 3px 5px; background:{{ $offerWallTemplate->headerMenuBg }};">
                 <ul class="menuNav" style="display: flex; align-items: center; justify-content: start; gap: 15px; padding: 0; margin: 0; list-style: none;">
                     <li>
-                        <a  href="{{ route('offerwall', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId']]) }}" style="display: block;font-family: Open Sans; padding: 14px 10px; font-size: 15px; color: {{ $offerWallTemplate->headerNonActiveTextColor }}; border-bottom: 1px solid transparent; text-decoration: none; ">Offers</a>
+                        <a  href="{{ route('offerwall', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId'], 'sub4' => $requestedParams['sub4'], 'sub5' => $requestedParams['sub5'], 'sub6' => $requestedParams['sub6']]) }}" style="display: block;font-family: Open Sans; padding: 14px 10px; font-size: 15px; color: {{ $offerWallTemplate->headerNonActiveTextColor }}; border-bottom: 1px solid transparent; text-decoration: none; ">Offers</a>
                     </li>
                     <li>
-                        <a class="active" href="{{ route('completedOffers', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId']]) }}" style="display: block;font-family: Open Sans; padding: 14px 10px; font-size: 15px; color: {{ $offerWallTemplate->headerTextColor }}; border-bottom: 1px solid transparent; text-decoration: none;  background: {{ $offerWallTemplate->headerActiveBg }}">My Rewards</a>
+                        <a class="active" href="{{ route('completedOffers', ['apiKey' => $requestedParams['apiKey'], 'wallId' => $requestedParams['wallId'], 'userId' => $requestedParams['userId'], 'sub4' => $requestedParams['sub4'], 'sub5' => $requestedParams['sub5'], 'sub6' => $requestedParams['sub6']]) }}" style="display: block;font-family: Open Sans; padding: 14px 10px; font-size: 15px; color: {{ $offerWallTemplate->headerTextColor }}; border-bottom: 1px solid transparent; text-decoration: none;  background: {{ $offerWallTemplate->headerActiveBg }}">My Rewards</a>
                     </li>
                 </ul>
             </div>
